@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Coach
+from .models import Coach, Tank
 
 
 @admin.register(Coach)
@@ -21,6 +21,31 @@ class CoachAdmin(admin.ModelAdmin):
     search_fields = ("ntes_coach__coach_number",)
 
     ordering = ("physical_sequence",)
+
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+
+
+@admin.register(Tank)
+class TankAdmin(admin.ModelAdmin):
+    list_display = (
+        "tank_index",
+        "coach",
+        "camera",
+        "confidence",
+    )
+
+    list_filter = ("camera",)
+
+    search_fields = ("coach__ntes_coach__coach_number",)
+
+    ordering = (
+        "coach__physical_sequence",
+        "tank_index",
+    )
 
     readonly_fields = (
         "id",
