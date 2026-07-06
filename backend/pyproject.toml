@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 88
+target-version = ["py313"]
+extend-exclude = '''
+(
+    migrations
+)
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip_glob = [
+    "*/migrations/*",
+]
