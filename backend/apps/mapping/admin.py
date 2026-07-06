@@ -69,8 +69,4 @@ class TankDefectAdmin(admin.ModelAdmin):
         "tank__coach__ntes_coach__coach_number",
     )
 
-    readonly_fields = (
-        "id",
-        "created_at",
-        "updated_at"
-    )
+    readonly_fields = ("id", "created_at", "updated_at")

@@ -1,3 +1,40 @@
-"from django.db import models"
+import uuid
 
-# Create your models here.
+from django.db import models
+
+from apps.inspection.models import Inspection
+
+
+class AIResultRaw(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    inspection = models.ForeignKey(
+        Inspection,
+        on_delete=models.CASCADE,
+        related_name="ai_results",
+    )
+
+    payload = models.JSONField(
+        help_text="Raw JSON payload received from the AI service.",
+    )
+
+    received_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        db_table = "ai_result_raw"
+        ordering = ["-received_at"]
+        indexes = [
+            models.Index(fields=["inspection"]),
+            models.Index(fields=["received_at"]),
+        ]
+        verbose_name = "AI Result"
+        verbose_name_plural = "AI Results"
+
+    def __str__(self):
+        return f"AI Result - {self.inspection.train_number}"

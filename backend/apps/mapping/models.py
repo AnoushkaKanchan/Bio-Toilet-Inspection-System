@@ -132,6 +132,7 @@ class Tank(models.Model):
     def __str__(self):
         return f"Tank {self.tank_index} ({self.camera})"
 
+
 class TankDefect(models.Model):
     id = models.UUIDField(
         primary_key=True,
