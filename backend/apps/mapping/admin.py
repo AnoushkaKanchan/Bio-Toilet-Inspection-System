@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Coach, Tank
+from .models import Coach, Tank, TankDefect
 
 
 @admin.register(Coach)
@@ -51,4 +51,26 @@ class TankAdmin(admin.ModelAdmin):
         "id",
         "created_at",
         "updated_at",
+    )
+
+
+@admin.register(TankDefect)
+class TankDefectAdmin(admin.ModelAdmin):
+    list_display = (
+        "tank",
+        "defect_type",
+        "confidence",
+    )
+
+    list_filter = ("defect_type",)
+
+    search_fields = (
+        "defect_type",
+        "tank__coach__ntes_coach__coach_number",
+    )
+
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at"
     )

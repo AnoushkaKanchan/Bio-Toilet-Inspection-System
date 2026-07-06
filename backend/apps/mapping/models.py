@@ -131,3 +131,44 @@ class Tank(models.Model):
 
     def __str__(self):
         return f"Tank {self.tank_index} ({self.camera})"
+
+class TankDefect(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    tank = models.ForeignKey(
+        Tank,
+        on_delete=models.CASCADE,
+        related_name="defects",
+    )
+
+    defect_type = models.CharField(
+        max_length=100,
+        help_text="Raw defect label returned by the AI service.",
+    )
+
+    confidence = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        help_text="AI confidence score for the detected defect.",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "tank_defect"
+        ordering = ["id"]
+        verbose_name = "Tank Defect"
+        verbose_name_plural = "Tank Defects"
+
+    def __str__(self):
+        return f"{self.defect_type} ({self.confidence}%)"
