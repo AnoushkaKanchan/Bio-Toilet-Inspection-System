@@ -6,7 +6,7 @@ from .models import Coach, Tank, TankDefect
 @admin.register(Coach)
 class CoachAdmin(admin.ModelAdmin):
     list_display = (
-        "physical_sequence",
+        "inspection_sequence",
         "ntes_coach",
         "mapping_status",
         "coach_inspection_status",
@@ -20,7 +20,7 @@ class CoachAdmin(admin.ModelAdmin):
 
     search_fields = ("ntes_coach__coach_number",)
 
-    ordering = ("physical_sequence",)
+    ordering = ("inspection_sequence",)
 
     readonly_fields = (
         "id",
@@ -43,7 +43,7 @@ class TankAdmin(admin.ModelAdmin):
     search_fields = ("coach__ntes_coach__coach_number",)
 
     ordering = (
-        "coach__physical_sequence",
+        "coach__inspection_sequence",
         "tank_index",
     )
 

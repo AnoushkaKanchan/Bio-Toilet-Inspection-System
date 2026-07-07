@@ -10,13 +10,11 @@ class MappingStatus(models.TextChoices):
     PENDING = "PENDING", "Pending"
     MATCHED = "MATCHED", "Matched"
     UNMATCHED = "UNMATCHED", "Unmatched"
-    MANUAL = "MANUAL", "Manual"
 
 
 class CoachInspectionStatus(models.TextChoices):
     NORMAL = "NORMAL", "Normal"
     DEFECT = "DEFECT", "Defect"
-    PARTIAL = "PARTIAL", "Partial"
 
 
 class CameraSide(models.TextChoices):
@@ -45,7 +43,12 @@ class Coach(models.Model):
         blank=True,
     )
 
-    physical_sequence = models.PositiveIntegerField()
+    inspection_sequence = models.PositiveIntegerField(
+        help_text=(
+            "Coach sequence used for this inspection after the Mapping Engine "
+            "applies pit-line direction and mapping rules."
+        ),
+    )
 
     mapping_status = models.CharField(
         max_length=20,
@@ -69,13 +72,19 @@ class Coach(models.Model):
 
     class Meta:
         db_table = "coach"
-        ordering = ["physical_sequence"]
+        ordering = ["inspection_sequence"]
         verbose_name = "Coach"
         verbose_name_plural = "Coaches"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["inspection", "inspection_sequence"],
+                name="unique_inspection_sequence_per_inspection",
+            ),
+        ]
 
     def __str__(self):
         coach_number = self.ntes_coach.coach_number if self.ntes_coach else "UNMATCHED"
-        return f"{self.physical_sequence} - {coach_number}"
+        return f"{self.inspection_sequence} - {coach_number}"
 
 
 class Tank(models.Model):
@@ -113,6 +122,13 @@ class Tank(models.Model):
         max_digits=5,
         decimal_places=2,
         help_text="AI confidence score.",
+    )
+
+    evidence_image_path = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text="Path to the AI-generated evidence image.",
     )
 
     created_at = models.DateTimeField(
@@ -167,9 +183,15 @@ class TankDefect(models.Model):
 
     class Meta:
         db_table = "tank_defect"
-        ordering = ["id"]
+        ordering = ["id", "created_at"]
         verbose_name = "Tank Defect"
         verbose_name_plural = "Tank Defects"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tank", "defect_type"],
+                name="unique_defect_per_tank",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.defect_type} ({self.confidence}%)"

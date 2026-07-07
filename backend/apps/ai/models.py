@@ -6,6 +6,13 @@ from apps.inspection.models import Inspection
 
 
 class AIResultRaw(models.Model):
+    """
+    Immutable integration record.
+
+    Stores the raw AI payload exactly as received.
+    Business services must never modify the payload after creation.
+    """
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -19,7 +26,10 @@ class AIResultRaw(models.Model):
     )
 
     payload = models.JSONField(
-        help_text="Raw JSON payload received from the AI service.",
+        help_text=(
+            "Immutable raw JSON payload received from the AI service. "
+            "Must never be modified after creation."
+        ),
     )
 
     received_at = models.DateTimeField(

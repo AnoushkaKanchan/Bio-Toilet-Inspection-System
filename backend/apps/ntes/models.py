@@ -42,6 +42,16 @@ class NTESCoach(models.Model):
         ordering = ["coach_sequence"]
         verbose_name = "NTES Coach"
         verbose_name_plural = "NTES Coaches"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["inspection", "coach_sequence"],
+                name="unique_coach_sequence_per_inspection",
+            ),
+            models.UniqueConstraint(
+                fields=["inspection", "coach_number"],
+                name="unique_coach_number_per_inspection",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.coach_sequence} - {self.coach_number}"
