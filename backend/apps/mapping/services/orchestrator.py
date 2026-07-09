@@ -1,4 +1,3 @@
-from apps.ai.models import AIResultRaw
 from apps.inspection.models import Inspection
 
 
