@@ -1,0 +1,2 @@
+class InspectionFinalizationError(Exception):
+    pass
