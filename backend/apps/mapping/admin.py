@@ -32,7 +32,7 @@ class CoachAdmin(admin.ModelAdmin):
 @admin.register(Tank)
 class TankAdmin(admin.ModelAdmin):
     list_display = (
-        "tank_index",
+        "tank_identifier",
         "coach",
         "camera",
         "confidence",
@@ -44,7 +44,7 @@ class TankAdmin(admin.ModelAdmin):
 
     ordering = (
         "coach__inspection_sequence",
-        "tank_index",
+        "tank_identifier",
     )
 
     readonly_fields = (

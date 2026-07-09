@@ -1,4 +1,6 @@
+from apps.mapping.configuration import AI_STATUS_TO_DEFECT
 from apps.mapping.contracts import ResolvedCoach
+from apps.mapping.enums import TankDefectType
 from apps.mapping.exceptions import MappingValidationError
 from apps.ntes.models import NTESCoach
 
@@ -62,3 +64,18 @@ class RailwayMapper:
             )
 
         return resolved
+
+    def translate_defects(
+        self,
+        tank_payload: dict,
+    ) -> list[TankDefectType]:
+        defects = []
+
+        for (
+            field,
+            value,
+        ), defect in AI_STATUS_TO_DEFECT.items():
+            if tank_payload.get(field) == value:
+                defects.append(defect)
+
+        return defects

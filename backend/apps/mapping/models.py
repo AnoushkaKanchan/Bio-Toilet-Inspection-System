@@ -100,11 +100,9 @@ class Tank(models.Model):
         related_name="tanks",
     )
 
-    tank_index = models.PositiveIntegerField(
-        help_text=(
-            "Global tank index assigned by the AI for the entire inspection. "
-            "Uniqueness is enforced by the Mapping Engine."
-        ),
+    tank_identifier = models.CharField(
+        max_length=20,
+        help_text="Globally unique tank identifier returned by the AI (e.g. L32, R15).",
     )
 
     camera = models.CharField(
@@ -141,12 +139,18 @@ class Tank(models.Model):
 
     class Meta:
         db_table = "tank"
-        ordering = ["tank_index"]
+        ordering = ["tank_identifier"]
         verbose_name = "Tank"
         verbose_name_plural = "Tanks"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tank_identifier"],
+                name="unique_tank_identifier",
+            ),
+        ]
 
     def __str__(self):
-        return f"Tank {self.tank_index} ({self.camera})"
+        return f"{self.tank_identifier} ({self.camera})"
 
 
 class TankDefect(models.Model):
