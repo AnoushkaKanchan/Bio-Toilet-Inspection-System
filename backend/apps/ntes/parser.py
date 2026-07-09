@@ -1,0 +1,2 @@
+class NTESParser:
+    pass

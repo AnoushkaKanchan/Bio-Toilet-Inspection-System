@@ -1,5 +1,7 @@
-from .verifier import NTESVerifier
+from .synchronization import SynchronizationService
+from .verification import NTESVerificationService
 
 __all__ = [
-    "NTESVerifier",
+    "SynchronizationService",
+    "NTESVerificationService",
 ]

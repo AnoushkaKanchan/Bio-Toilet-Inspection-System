@@ -1,0 +1,2 @@
+class NTESCoachRepository:
+    pass
