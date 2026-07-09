@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
+from apps.ntes.models import NTESCoach
+
 
 @dataclass(frozen=True)
-class CoachMappingResult:
-    coach_position: int  # AI position after pit-line orientation
-    coach_sequence: int  # Original NTES sequence
-    coach_number: str  # NTES coach number
+class ResolvedCoach:
+    ai_coach_number: int
+    ntes_coach: NTESCoach

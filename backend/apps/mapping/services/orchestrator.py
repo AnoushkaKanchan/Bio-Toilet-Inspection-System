@@ -1,21 +1,23 @@
-from apps.inspection.models import Inspection
+from apps.mapping.contracts import ResolvedCoach
+from apps.mapping.services.mapper import RailwayMapper
+from apps.ntes.models import NTESCoach
 
 
 class MappingOrchestrator:
     """
-    Coordinates the mapping workflow.
-
-    This class contains no railway business rules.
+    Coordinates the railway mapping workflow.
     """
 
-    def __init__(self, inspection: Inspection):
-        self.inspection = inspection
+    def __init__(self):
+        self.mapper = RailwayMapper()
 
-    def execute(self):
-        """
-        Execute the complete mapping workflow.
-        """
-
-        raise NotImplementedError(
-            "Mapping workflow will be implemented in Mini Phase 5.2."
+    def execute(
+        self,
+        *,
+        payload: dict,
+        coaches: list[NTESCoach],
+    ) -> list[ResolvedCoach]:
+        return self.mapper.resolve_coaches(
+            payload=payload,
+            coaches=coaches,
         )
