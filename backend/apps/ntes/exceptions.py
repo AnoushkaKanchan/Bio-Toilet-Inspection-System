@@ -30,3 +30,23 @@ class NTESVerificationError(NTESError):
 
 class NTESSynchronizationError(NTESError):
     pass
+
+
+class NTESUnavailableError(NTESError):
+    """NTES website is unavailable."""
+
+
+class TrainNotFoundError(NTESError):
+    """Train number not found on NTES."""
+
+
+class CoachCompositionNotFoundError(NTESError):
+    """Coach Position could not be opened."""
+
+
+class NTESParsingError(NTESError):
+    """Raised by the HTML parser."""
+
+
+class NTESClientTimeoutError(NTESError):
+    """Playwright timeout while interacting with NTES."""

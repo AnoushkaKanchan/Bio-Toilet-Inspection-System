@@ -157,3 +157,23 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
 }
+
+# ---------------------------------------------------------------------
+# NTES Client Configuration
+# ---------------------------------------------------------------------
+
+NTES_BASE_URL = "https://enquiry.indianrail.gov.in/mntes/"
+
+NTES_BROWSER = "chromium"
+
+NTES_HEADLESS = True
+
+NTES_TIMEOUT_MS = 30_000
+
+NTES_MAX_RETRIES = 2
+
+NTES_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/138.0.0.0 Safari/537.36"
+)
