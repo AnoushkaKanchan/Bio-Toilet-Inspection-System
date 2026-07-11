@@ -17,9 +17,7 @@ def normalizer():
     return NTESNormalizer()
 
 
-def test_normalize_single_coach(
-    normalizer,
-):
+def test_normalize_single_coach(normalizer):
     raw = [
         RawCoachDTO(
             coach_sequence=" 12 ",
@@ -28,11 +26,7 @@ def test_normalize_single_coach(
         )
     ]
 
-    result = normalizer.normalize(
-        raw,
-    )
-
-    assert result == [
+    assert normalizer.normalize(raw) == [
         NTESCoachDTO(
             coach_sequence=12,
             coach_number="S3",
@@ -41,9 +35,7 @@ def test_normalize_single_coach(
     ]
 
 
-def test_invalid_sequence(
-    normalizer,
-):
+def test_invalid_sequence(normalizer):
     raw = [
         RawCoachDTO(
             coach_sequence="ABC",
@@ -52,71 +44,73 @@ def test_invalid_sequence(
         )
     ]
 
-    with pytest.raises(
-        NTESNormalizationError,
-    ):
-        normalizer.normalize(
-            raw,
-        )
+    with pytest.raises(NTESNormalizationError):
+        normalizer.normalize(raw)
 
 
-def test_empty_coach_number(
-    normalizer,
-):
+def test_negative_sequence(normalizer):
     raw = [
         RawCoachDTO(
-            coach_sequence="1",
-            coach_number="",
+            coach_sequence="-1",
+            coach_number="S1",
             coach_type="SL",
         )
     ]
 
-    with pytest.raises(
-        NTESNormalizationError,
-    ):
-        normalizer.normalize(
-            raw,
-        )
+    with pytest.raises(NTESNormalizationError):
+        normalizer.normalize(raw)
 
 
-def test_empty_coach_type(
-    normalizer,
-):
+def test_duplicate_sequence(normalizer):
     raw = [
-        RawCoachDTO(
-            coach_sequence="1",
-            coach_number="S1",
-            coach_type="",
-        )
+        RawCoachDTO("1", "S1", "SL"),
+        RawCoachDTO("1", "S2", "SL"),
     ]
 
-    with pytest.raises(
-        NTESNormalizationError,
-    ):
-        normalizer.normalize(
-            raw,
-        )
+    with pytest.raises(NTESNormalizationError):
+        normalizer.normalize(raw)
 
 
-def test_multiple_coaches(
-    normalizer,
-):
+def test_duplicate_coach_number(normalizer):
     raw = [
-        RawCoachDTO(
-            coach_sequence="1",
-            coach_number=" s1 ",
-            coach_type=" sl ",
-        ),
-        RawCoachDTO(
-            coach_sequence="2",
-            coach_number=" b1 ",
-            coach_type=" 3A ",
-        ),
+        RawCoachDTO("1", "S1", "SL"),
+        RawCoachDTO("2", " s1 ", "SL"),
     ]
 
-    result = normalizer.normalize(
-        raw,
-    )
+    with pytest.raises(NTESNormalizationError):
+        normalizer.normalize(raw)
+
+
+def test_empty_coach_list(normalizer):
+    with pytest.raises(NTESNormalizationError):
+        normalizer.normalize([])
+
+
+def test_empty_coach_number(normalizer):
+    raw = [
+        RawCoachDTO("1", "", "SL"),
+    ]
+
+    with pytest.raises(NTESNormalizationError):
+        normalizer.normalize(raw)
+
+
+def test_empty_coach_type(normalizer):
+    raw = [
+        RawCoachDTO("1", "S1", ""),
+    ]
+
+    with pytest.raises(NTESNormalizationError):
+        normalizer.normalize(raw)
+
+
+def test_multiple_coaches(normalizer):
+    raw = [
+        RawCoachDTO("1", " s1 ", " sl "),
+        RawCoachDTO("2", " b1 ", " 3A "),
+    ]
+
+    result = normalizer.normalize(raw)
 
     assert len(result) == 2
 

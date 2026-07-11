@@ -12,24 +12,45 @@ class NTESNormalizer:
         self,
         coaches: list[RawCoachDTO],
     ) -> list[NTESCoachDTO]:
-        normalized = []
+        if not coaches:
+            raise NTESNormalizationError("Coach composition is empty.")
+
+        normalized: list[NTESCoachDTO] = []
+
+        seen_sequences: set[int] = set()
+        seen_numbers: set[str] = set()
 
         for coach in coaches:
             self._validate_required_fields(
                 coach,
             )
 
+            sequence = self._normalize_sequence(
+                coach.coach_sequence,
+            )
+
+            coach_number = self._normalize_coach_number(
+                coach.coach_number,
+            )
+
+            coach_type = self._normalize_coach_type(
+                coach.coach_type,
+            )
+
+            if sequence in seen_sequences:
+                raise NTESNormalizationError(f"Duplicate coach sequence: {sequence}.")
+
+            if coach_number in seen_numbers:
+                raise NTESNormalizationError(f"Duplicate coach number: {coach_number}.")
+
+            seen_sequences.add(sequence)
+            seen_numbers.add(coach_number)
+
             normalized.append(
                 NTESCoachDTO(
-                    coach_sequence=self._normalize_sequence(
-                        coach.coach_sequence,
-                    ),
-                    coach_number=self._normalize_coach_number(
-                        coach.coach_number,
-                    ),
-                    coach_type=self._normalize_coach_type(
-                        coach.coach_type,
-                    ),
+                    coach_sequence=sequence,
+                    coach_number=coach_number,
+                    coach_type=coach_type,
                 )
             )
 
@@ -39,13 +60,13 @@ class NTESNormalizer:
         self,
         coach: RawCoachDTO,
     ) -> None:
-        if not coach.coach_sequence.strip():
+        if not coach.coach_sequence:
             raise NTESNormalizationError("Coach sequence is required.")
 
-        if not coach.coach_number.strip():
+        if not coach.coach_number:
             raise NTESNormalizationError("Coach number is required.")
 
-        if not coach.coach_type.strip():
+        if not coach.coach_type:
             raise NTESNormalizationError("Coach type is required.")
 
     def _normalize_sequence(
@@ -55,12 +76,18 @@ class NTESNormalizer:
         value = sequence.strip()
 
         try:
-            return int(value)
-
+            normalized = int(value)
         except ValueError as exc:
             raise NTESNormalizationError(
                 f"Invalid coach sequence: '{sequence}'."
             ) from exc
+
+        if normalized <= 0:
+            raise NTESNormalizationError(
+                f"Coach sequence must be positive: {normalized}."
+            )
+
+        return normalized
 
     def _normalize_coach_number(
         self,
