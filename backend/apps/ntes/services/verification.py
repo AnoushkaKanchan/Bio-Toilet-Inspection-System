@@ -58,6 +58,7 @@ class NTESVerificationService:
         if len(sequences) != len(set(sequences)):
             raise NTESVerificationError("Duplicate coach sequence detected.")
 
+        # Repository guarantees ordering by coach_sequence.
         expected = list(
             range(
                 1,

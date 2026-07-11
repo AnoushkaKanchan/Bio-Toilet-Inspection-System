@@ -1,2 +1,76 @@
+import logging
+import time
+
+from django.db import transaction
+
+from apps.inspection.models import Inspection
+from apps.ntes.clients import PlaywrightNTESClient
+from apps.ntes.models import NTESCoach
+from apps.ntes.normalizer import NTESNormalizer
+from apps.ntes.parser import NTESHTMLParser
+from apps.ntes.repositories import NTESCoachRepository
+from apps.ntes.services.verification import NTESVerificationService
+
+logger = logging.getLogger(__name__)
+
+
 class SynchronizationService:
-    pass
+    def __init__(
+        self,
+        *,
+        client: PlaywrightNTESClient | None = None,
+        parser: NTESHTMLParser | None = None,
+        normalizer: NTESNormalizer | None = None,
+        repository: NTESCoachRepository | None = None,
+        verifier: NTESVerificationService | None = None,
+    ) -> None:
+        self._client = client or PlaywrightNTESClient()
+        self._parser = parser or NTESHTMLParser()
+        self._normalizer = normalizer or NTESNormalizer()
+        self._repository = repository or NTESCoachRepository()
+        self._verifier = verifier or NTESVerificationService(
+            repository=self._repository,
+        )
+
+    @transaction.atomic
+    def synchronize(
+        self,
+        *,
+        inspection: Inspection,
+    ) -> list[NTESCoach]:
+        start = time.monotonic()
+
+        logger.info(
+            "Starting NTES synchronization for inspection %s (train %s).",
+            inspection.id,
+            inspection.train_number,
+        )
+
+        html = self._client.fetch(
+            train_number=inspection.train_number,
+        )
+
+        raw_coaches = self._parser.parse(
+            html=html,
+        )
+
+        coach_dtos = self._normalizer.normalize(
+            coaches=raw_coaches,
+        )
+
+        self._repository.replace_composition(
+            inspection=inspection,
+            coaches=coach_dtos,
+        )
+
+        coaches = self._verifier.verify(
+            inspection=inspection,
+        )
+
+        logger.info(
+            "Completed NTES synchronization for inspection %s in %.2f seconds.",
+            inspection.id,
+            time.monotonic() - start,
+        )
+
+        return coaches
