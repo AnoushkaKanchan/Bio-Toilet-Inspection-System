@@ -1,8 +1,8 @@
 from pathlib import Path
-from django.utils import timezone
 from unittest.mock import Mock
 
 import pytest
+from django.utils import timezone
 
 from apps.inspection.models import Inspection
 from apps.ntes.normalizer import NTESNormalizer

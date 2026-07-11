@@ -1,12 +1,13 @@
 from contextlib import nullcontext
 from unittest.mock import Mock, patch
-import pytest
 
-pytestmark = pytest.mark.django_db
+import pytest
 
 from apps.ntes.services.synchronization import (
     SynchronizationService,
 )
+
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture

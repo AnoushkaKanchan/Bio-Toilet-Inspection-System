@@ -48,7 +48,7 @@ def test_verify_empty_composition():
         )
 
 
-def test_verify_sequence_must_start_at_zero():    
+def test_verify_sequence_must_start_at_zero():
     service = NTESVerificationService(
         repository=RepositoryStub(
             [Coach(1), Coach(2)],
