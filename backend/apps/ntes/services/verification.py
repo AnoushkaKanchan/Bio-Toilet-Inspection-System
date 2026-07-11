@@ -52,8 +52,8 @@ class NTESVerificationService:
     ) -> None:
         sequences = [coach.coach_sequence for coach in coaches]
 
-        if sequences[0] != 1:
-            raise NTESVerificationError("Coach sequence must start at 1.")
+        if sequences[0] != 0:
+            raise NTESVerificationError("Coach sequence must start at 0.")
 
         if len(sequences) != len(set(sequences)):
             raise NTESVerificationError("Duplicate coach sequence detected.")
@@ -61,8 +61,8 @@ class NTESVerificationService:
         # Repository guarantees ordering by coach_sequence.
         expected = list(
             range(
-                1,
-                len(sequences) + 1,
+                0,
+                len(sequences),
             )
         )
 

@@ -47,10 +47,6 @@ class NTESCoach(models.Model):
                 fields=["inspection", "coach_sequence"],
                 name="unique_coach_sequence_per_inspection",
             ),
-            models.UniqueConstraint(
-                fields=["inspection", "coach_number"],
-                name="unique_coach_number_per_inspection",
-            ),
         ]
 
     def __str__(self):

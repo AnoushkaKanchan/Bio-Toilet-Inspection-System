@@ -18,7 +18,6 @@ class NTESNormalizer:
         normalized: list[NTESCoachDTO] = []
 
         seen_sequences: set[int] = set()
-        seen_numbers: set[str] = set()
 
         for coach in coaches:
             self._validate_required_fields(
@@ -40,11 +39,7 @@ class NTESNormalizer:
             if sequence in seen_sequences:
                 raise NTESNormalizationError(f"Duplicate coach sequence: {sequence}.")
 
-            if coach_number in seen_numbers:
-                raise NTESNormalizationError(f"Duplicate coach number: {coach_number}.")
-
             seen_sequences.add(sequence)
-            seen_numbers.add(coach_number)
 
             normalized.append(
                 NTESCoachDTO(
@@ -82,9 +77,9 @@ class NTESNormalizer:
                 f"Invalid coach sequence: '{sequence}'."
             ) from exc
 
-        if normalized <= 0:
+        if normalized < 0:
             raise NTESNormalizationError(
-                f"Coach sequence must be positive: {normalized}."
+                f"Coach sequence must be non-negative: {normalized}."
             )
 
         return normalized

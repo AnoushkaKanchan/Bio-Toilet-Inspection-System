@@ -20,9 +20,9 @@ class RepositoryStub:
 @pytest.mark.parametrize(
     "coaches",
     [
-        [Coach(1)],
-        [Coach(1), Coach(2)],
-        [Coach(1), Coach(2), Coach(3), Coach(4)],
+        [Coach(0)],
+        [Coach(0), Coach(1)],
+        [Coach(0), Coach(1), Coach(2), Coach(3)],
     ],
 )
 def test_verify_valid_composition(coaches):
@@ -48,10 +48,10 @@ def test_verify_empty_composition():
         )
 
 
-def test_verify_sequence_starts_at_two():
+def test_verify_sequence_must_start_at_zero():    
     service = NTESVerificationService(
         repository=RepositoryStub(
-            [Coach(2), Coach(3)],
+            [Coach(1), Coach(2)],
         ),
     )
 
@@ -64,7 +64,7 @@ def test_verify_sequence_starts_at_two():
 def test_verify_missing_sequence():
     service = NTESVerificationService(
         repository=RepositoryStub(
-            [Coach(1), Coach(2), Coach(4)],
+            [Coach(0), Coach(1), Coach(3)],
         ),
     )
 
@@ -77,7 +77,7 @@ def test_verify_missing_sequence():
 def test_verify_duplicate_sequence():
     service = NTESVerificationService(
         repository=RepositoryStub(
-            [Coach(1), Coach(2), Coach(2)],
+            [Coach(0), Coach(1), Coach(1)],
         ),
     )
 
