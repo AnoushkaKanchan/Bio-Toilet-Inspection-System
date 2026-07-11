@@ -21,7 +21,9 @@ def dependencies():
 
 
 @pytest.fixture
-def service(dependencies,):
+def service(
+    dependencies,
+):
     with patch(
         "apps.ntes.services.synchronization.transaction.atomic",
         return_value=nullcontext(),
@@ -33,6 +35,7 @@ def service(dependencies,):
             repository=dependencies["repository"],
             verifier=dependencies["verifier"],
         )
+
 
 def test_synchronize_success(
     service,
