@@ -24,21 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 class PlaywrightNTESClient:
-    """
-    Retrieves the rendered Coach Position modal HTML from NTES.
-
-    Responsibilities:
-        - Browser automation
-        - Navigation
-        - User interaction
-        - Returning modal HTML
-
-    Does NOT:
-        - Parse HTML
-        - Validate data
-        - Persist data
-        - Apply railway business rules
-    """
 
     def fetch(
         self,
@@ -87,7 +72,7 @@ class PlaywrightNTESClient:
             )
 
             logger.info(
-                "Successfully retrieved coach composition " "for train %s.",
+                "Successfully retrieved coach composition for train %s.",
                 train_number,
             )
 
@@ -220,7 +205,7 @@ class PlaywrightNTESClient:
     ) -> None:
         invalid_train = page.locator(".w3-panel.w3-red")
 
-        if invalid_train.count() == 0:
+        if not invalid_train.is_visible():
             return
 
         message = invalid_train.inner_text().strip()
@@ -284,9 +269,9 @@ class PlaywrightNTESClient:
                 timeout=settings.NTES_TIMEOUT_MS,
             )
 
-            html = modal.inner_html()
+            html = modal.inner_html().strip()
 
-            if not html.strip():
+            if not html:
                 raise CoachCompositionNotFoundError("Coach Position modal is empty.")
 
             return html
@@ -303,14 +288,21 @@ class PlaywrightNTESClient:
         context: BrowserContext | None,
         page: Page | None,
     ) -> None:
-        if page is not None:
-            page.close()
+        for resource in (
+            page,
+            context,
+            browser,
+        ):
+            if resource is None:
+                continue
 
-        if context is not None:
-            context.close()
-
-        if browser is not None:
-            browser.close()
+            try:
+                resource.close()
+            except Exception:
+                logger.exception("Failed to close Playwright resource.")
 
         if playwright is not None:
-            playwright.stop()
+            try:
+                playwright.stop()
+            except Exception:
+                logger.exception("Failed to stop Playwright.")
