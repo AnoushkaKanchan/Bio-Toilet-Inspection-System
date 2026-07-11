@@ -2,8 +2,8 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
-
 from django.utils import timezone
+
 from apps.inspection.models import Inspection
 from apps.inspection.repositories import InspectionRepository
 from apps.inspection.services import InspectionWorkflowService

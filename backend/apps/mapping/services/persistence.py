@@ -11,12 +11,25 @@ from apps.mapping.models import (
     Tank,
     TankDefect,
 )
+from apps.mapping.repositories import (
+    CoachRepository,
+    TankDefectRepository,
+    TankRepository,
+)
 
 
 class RailwayMappingPersistence:
-    """
-    Persists railway mapping domain entities.
-    """
+
+    def __init__(
+        self,
+        *,
+        coach_repository: CoachRepository | None = None,
+        tank_repository: TankRepository | None = None,
+        tank_defect_repository: TankDefectRepository | None = None,
+    ) -> None:
+        self._coach_repository = coach_repository or CoachRepository()
+        self._tank_repository = tank_repository or TankRepository()
+        self._tank_defect_repository = tank_defect_repository or TankDefectRepository()
 
     def create_coach(
         self,
@@ -24,12 +37,11 @@ class RailwayMappingPersistence:
         inspection: Inspection,
         resolved_coach: ResolvedCoach,
     ) -> Coach:
-        return Coach.objects.create(
+        return self._coach_repository.create(
             inspection=inspection,
-            ntes_coach=resolved_coach.ntes_coach,
-            inspection_sequence=resolved_coach.ai_coach_number,
+            resolved_coach=resolved_coach,
             mapping_status=self._initial_mapping_status(),
-            coach_inspection_status=self._initial_inspection_status(),
+            inspection_status=self._initial_inspection_status(),
         )
 
     def create_tank(
@@ -44,13 +56,26 @@ class RailwayMappingPersistence:
         confidence = tank_data["detection_confidence"]
         evidence_image_path = tank_data["detection_image_path"]
 
-        return Tank.objects.create(
+        return self._tank_repository.create(
             coach=coach,
             tank_identifier=tank_identifier,
             camera=self._camera_side(camera),
             timestamp_seconds=timestamp,
             confidence=confidence,
             evidence_image_path=evidence_image_path,
+        )
+
+    def create_tank_defects(
+        self,
+        *,
+        tank: Tank,
+        defects: list[TankDefectType],
+        confidence: Decimal,
+    ) -> list[TankDefect]:
+        return self._tank_defect_repository.create_many(
+            tank=tank,
+            defects=defects,
+            confidence=confidence,
         )
 
     def _initial_mapping_status(
@@ -68,26 +93,3 @@ class RailwayMappingPersistence:
         value: str,
     ) -> CameraSide:
         return CameraSide[value.upper()]
-
-    def create_tank_defects(
-        self,
-        *,
-        tank: Tank,
-        defects: list[TankDefectType],
-        confidence: Decimal,
-    ) -> list[TankDefect]:
-        if not defects:
-            return []
-
-        created_defects = []
-
-        for defect in defects:
-            created_defects.append(
-                TankDefect.objects.create(
-                    tank=tank,
-                    defect_type=defect,
-                    confidence=confidence,
-                )
-            )
-
-        return created_defects
