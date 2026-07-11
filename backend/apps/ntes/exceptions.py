@@ -17,7 +17,7 @@ class NTESValidationError(NTESError):
 
 
 class NTESNormalizationError(NTESError):
-    pass
+    """Raised when parsed coach data cannot be normalized."""
 
 
 class NTESPersistenceError(NTESError):
