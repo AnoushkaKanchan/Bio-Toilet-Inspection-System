@@ -25,7 +25,7 @@ class NTESPersistenceError(NTESError):
 
 
 class NTESVerificationError(NTESError):
-    pass
+    """Raised when persisted NTES coach composition is invalid."""
 
 
 class NTESSynchronizationError(NTESError):
