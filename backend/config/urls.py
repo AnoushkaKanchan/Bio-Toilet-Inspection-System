@@ -24,4 +24,8 @@ urlpatterns = [
         "api/reports/",
         include("apps.reports.urls"),
     ),
+    path(
+        "api/dashboard/",
+        include("apps.inspection.api.urls"),
+    ),
 ]
