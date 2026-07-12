@@ -30,6 +30,19 @@ class CoachRepository:
             coach_inspection_status=inspection_status,
         )
 
+    def get_by_inspection(
+        self,
+        *,
+        inspection,
+    ) -> list[Coach]:
+        return list(
+            Coach.objects.filter(
+                inspection=inspection,
+            ).order_by(
+                "inspection_sequence",
+            )
+        )
+
 
 class TankRepository:
     def create(

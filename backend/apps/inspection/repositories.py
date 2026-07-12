@@ -1,9 +1,10 @@
 from apps.inspection.dto import InspectionStatistics
-from apps.inspection.models import Inspection
+from apps.inspection.models import Inspection, InspectionStatus
 from apps.mapping.models import Coach, Tank
 
 
 class InspectionRepository:
+
     def get(
         self,
         *,
@@ -69,3 +70,25 @@ class InspectionRepository:
         )
 
         return inspection
+
+    def get_active_inspections(
+        self,
+    ) -> list[Inspection]:
+        return list(
+            Inspection.objects.filter(
+                status=InspectionStatus.PROCESSING,
+            ).order_by(
+                "created_at",
+            )
+        )
+
+    def get_recent_inspections(
+        self,
+        *,
+        limit: int = 10,
+    ) -> list[Inspection]:
+        return list(
+            Inspection.objects.order_by(
+                "-created_at",
+            )[:limit]
+        )
