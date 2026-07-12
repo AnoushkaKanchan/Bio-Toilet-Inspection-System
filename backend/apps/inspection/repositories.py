@@ -58,9 +58,7 @@ class InspectionRepository:
     ) -> Inspection:
         inspection.total_coaches = statistics.total_coaches
         inspection.total_tanks = statistics.total_tanks
-        inspection.total_defected_tanks = (
-            statistics.total_defected_tanks
-        )
+        inspection.total_defected_tanks = statistics.total_defected_tanks
 
         inspection.save(
             update_fields=(

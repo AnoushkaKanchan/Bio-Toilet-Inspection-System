@@ -34,10 +34,7 @@ class InspectionFinalizer:
         statistics: InspectionStatistics,
     ) -> None:
         if (
-            statistics.healthy_tanks
-            + statistics.total_defected_tanks
+            statistics.healthy_tanks + statistics.total_defected_tanks
             != statistics.total_tanks
         ):
-            raise InspectionFinalizationError(
-                "Inspection statistics are inconsistent."
-            )
+            raise InspectionFinalizationError("Inspection statistics are inconsistent.")
