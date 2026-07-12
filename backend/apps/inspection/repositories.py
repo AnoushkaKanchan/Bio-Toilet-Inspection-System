@@ -92,3 +92,19 @@ class InspectionRepository:
                 "-created_at",
             )[:limit]
         )
+
+    def list(
+        self,
+        *,
+        status: str | None = None,
+    ):
+        queryset = Inspection.objects.order_by(
+            "-created_at",
+        )
+
+        if status is not None:
+            queryset = queryset.filter(
+                status=status,
+            )
+
+        return queryset

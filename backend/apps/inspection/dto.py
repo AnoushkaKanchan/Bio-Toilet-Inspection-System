@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass(frozen=True)
@@ -30,3 +31,15 @@ class RecentActivityDTO:
     pit_line: str
     status: str
     timestamp: str
+
+
+@dataclass(frozen=True)
+class InspectionListItemDTO:
+    inspection_id: str
+    train_number: str
+    pit_line: str
+    status: str
+    inspection_time: datetime
+    duration_minutes: int
+    total_coaches: int
+    total_defects: int
