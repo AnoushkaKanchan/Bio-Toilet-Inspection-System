@@ -81,3 +81,25 @@ class InspectionListItemDTO:
     pit_line: str
     status: str
     issue_count: int
+
+
+@dataclass(frozen=True)
+class CoachListItemDTO:
+    coach_id: str
+    inspection_sequence: int
+    coach_number: str
+    coach_type: str
+    status: str
+    left_side: str
+    right_side: str
+    confidence: float
+    tank_count: int
+    defect_count: int
+
+
+@dataclass(frozen=True)
+class CoachListResponseDTO:
+    inspection_id: str
+    train_number: str
+    train_name: str | None
+    coaches: list[CoachListItemDTO]

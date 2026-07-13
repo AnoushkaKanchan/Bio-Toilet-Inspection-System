@@ -8,6 +8,9 @@ from apps.mapping.models import (
     CameraSide,
     CoachInspectionStatus,
     MappingStatus,
+    Coach,
+    MappingStatus,
+    CoachInspectionStatus,
 )
 from apps.mapping.repositories import (
     CoachRepository,
@@ -97,3 +100,43 @@ def test_create_many_returns_empty_for_empty_input(
     )
 
     assert defects == []
+
+def test_get_detailed_by_inspection(
+    inspection,
+    coach,
+):
+    repository = CoachRepository()
+
+    coaches = repository.get_detailed_by_inspection(
+        inspection=inspection,
+    )
+
+    assert len(coaches) == 1
+    assert coaches[0].id == coach.id
+
+
+def test_get_detailed_by_inspection_ordering(
+    inspection,
+):
+    Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=2,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    repository = CoachRepository()
+
+    coaches = repository.get_detailed_by_inspection(
+        inspection=inspection,
+    )
+
+    assert coaches[0].inspection_sequence == 1
+    assert coaches[1].inspection_sequence == 2

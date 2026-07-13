@@ -7,11 +7,18 @@ from apps.inspection.serializers import (
     InspectionDetailsItemSerializer,
     InspectionListItemSerializer,
 )
+
+from apps.inspection.serializers import (
+    CoachListResponseSerializer,
+    InspectionDetailsItemSerializer,
+    InspectionListItemSerializer,
+)
+
 from apps.inspection.services import (
+    CoachListService,
     InspectionDetailsService,
     InspectionListService,
 )
-
 
 class InspectionDetailsAPIView(APIView):
 
@@ -112,3 +119,62 @@ class InspectionListAPIView(
         return paginator.get_paginated_response(
             serializer.data,
         )
+
+class CoachListAPIView(
+    APIView,
+):
+
+    def __init__(
+        self,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+
+        self._service = CoachListService()
+
+    def get(
+        self,
+        request,
+        inspection_id,
+    ):
+        search = request.query_params.get(
+            "search",
+        )
+
+        filter_by = request.query_params.get(
+            "filter",
+            "ALL",
+        )
+
+        try:
+            response = self._service.get_coaches(
+                inspection_id=inspection_id,
+                search=search,
+                filter_by=filter_by,
+            )
+
+        except ValueError as exc:
+            return Response(
+                {
+                    "detail": str(exc),
+                },
+                status=400,
+            )
+
+        except Inspection.DoesNotExist:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Inspection not found.",
+                },
+                status=404,
+            )
+
+        serializer = CoachListResponseSerializer(
+            response,
+        )
+
+        return Response(
+            serializer.data,
+        )
+

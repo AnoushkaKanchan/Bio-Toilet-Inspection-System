@@ -10,6 +10,7 @@ import pytest
 
 pytestmark = pytest.mark.django_db
 
+
 def test_get_inspection_details(
     inspection,
 ):
@@ -48,20 +49,12 @@ def test_get_inspection_details(
 
     assert details.train.name == inspection.train_name
 
-    assert (
-        details.inspection.total_coaches
-        == inspection.total_coaches
-    )
+    assert details.inspection.total_coaches == inspection.total_coaches
 
-    assert (
-        details.inspection.total_defects
-        == inspection.total_defected_tanks
-    )
+    assert details.inspection.total_defects == inspection.total_defected_tanks
 
-    assert (
-        details.mapping.completed
-        == (inspection.status == "COMPLETED")
-    )
+    assert details.mapping.completed == (inspection.status == "COMPLETED")
+
 
 def test_train_information(
     inspection,
@@ -72,15 +65,10 @@ def test_train_information(
         inspection_id=inspection.id,
     )
 
-    assert (
-        result.train.number
-        == inspection.train_number
-    )
+    assert result.train.number == inspection.train_number
 
-    assert (
-        result.train.name
-        == inspection.train_name
-    )
+    assert result.train.name == inspection.train_name
+
 
 def test_inspection_summary(
     inspection,
@@ -91,25 +79,14 @@ def test_inspection_summary(
         inspection_id=inspection.id,
     )
 
-    assert (
-        result.inspection.started_at
-        == inspection.inspection_time
-    )
+    assert result.inspection.started_at == inspection.inspection_time
 
-    assert (
-        result.inspection.total_coaches
-        == inspection.total_coaches
-    )
+    assert result.inspection.total_coaches == inspection.total_coaches
 
-    assert (
-        result.inspection.total_defects
-        == inspection.total_defected_tanks
-    )
+    assert result.inspection.total_defects == inspection.total_defected_tanks
 
-    assert (
-        result.inspection.duration_minutes
-        >= 0
-    )
+    assert result.inspection.duration_minutes >= 0
+
 
 def test_default_defect_summary(
     inspection,
@@ -120,20 +97,12 @@ def test_default_defect_summary(
         inspection_id=inspection.id,
     )
 
-    assert (
-        result.defect_summary.pipe_not_connected
-        == 0
-    )
+    assert result.defect_summary.pipe_not_connected == 0
 
-    assert (
-        result.defect_summary.pipe_support_absent
-        == 0
-    )
+    assert result.defect_summary.pipe_support_absent == 0
 
-    assert (
-        result.defect_summary.surface_not_clean
-        == 0
-    )
+    assert result.defect_summary.surface_not_clean == 0
+
 
 def test_mapping_status(
     inspection,
@@ -144,12 +113,6 @@ def test_mapping_status(
         inspection_id=inspection.id,
     )
 
-    assert (
-        result.mapping.completed
-        is False
-    )
+    assert result.mapping.completed is False
 
-    assert (
-        inspection.train_number
-        in result.mapping.message
-    )
+    assert inspection.train_number in result.mapping.message

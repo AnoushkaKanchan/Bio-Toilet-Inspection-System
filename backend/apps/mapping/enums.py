@@ -16,3 +16,16 @@ class TankDefectType(models.TextChoices):
         "SURFACE_NOT_CLEAN",
         "Surface Not Clean",
     )
+
+class CoachFilter(models.TextChoices):
+    ALL = "ALL", "All"
+    CLEAN = "CLEAN", "Clean"
+    DEFECT = "DEFECT", "Defect"
+
+class CoachStatus(models.TextChoices):
+    CLEAN = "CLEAN", "Clean"
+    DEFECT = "DEFECT", "Defect"
+
+class CoachSideStatus(models.TextChoices):
+    NORMAL = "NORMAL", "Normal"
+    DEFECT = "DEFECT", "Defect"

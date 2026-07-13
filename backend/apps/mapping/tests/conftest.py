@@ -61,3 +61,13 @@ def tank(
         confidence=Decimal("99.90"),
         evidence_image_path="evidence.png",
     )
+@pytest.fixture
+def coach(
+    inspection,
+):
+    return Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )

@@ -63,7 +63,7 @@ def test_details_endpoint_returns_exact_contract_values(
 
     assert "started_at" in body["inspection"]
     assert body["inspection"]["duration_minutes"] >= 0
-    assert (body["inspection"]["coaches_detected"]== inspection.total_coaches)
+    assert body["inspection"]["coaches_detected"] == inspection.total_coaches
 
     # Defect Summary Section (Zero-state validation for this fixture context)
     assert body["defect_summary"] == {
@@ -87,7 +87,7 @@ def test_get_details_endpoint_returns_404_not_found():
     assert response.status_code == 404
 
     body = response.json()
-    
+
     # Exact verification of the error schema payload
     assert body["success"] is False
     assert body["message"] == "Inspection not found."

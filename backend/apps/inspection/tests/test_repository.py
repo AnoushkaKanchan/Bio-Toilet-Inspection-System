@@ -8,6 +8,7 @@ from apps.mapping.models import (
     Coach,
     Tank,
     TankDefect,
+    Coach,
 )
 
 pytestmark = pytest.mark.django_db
