@@ -140,3 +140,125 @@ def test_get_detailed_by_inspection_ordering(
 
     assert coaches[0].inspection_sequence == 1
     assert coaches[1].inspection_sequence == 2
+
+def test_get_details_returns_coach(
+    inspection,
+):
+    coach = Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    repository = CoachRepository()
+
+    result = repository.get_details(
+        inspection=inspection,
+        coach_id=coach.id,
+    )
+
+    assert result == coach
+
+def test_get_details_invalid_coach(
+    inspection,
+):
+    repository = CoachRepository()
+
+    with pytest.raises(
+        Coach.DoesNotExist,
+    ):
+        repository.get_details(
+            inspection=inspection,
+            coach_id="11111111-1111-1111-1111-111111111111",
+        )
+
+def test_get_previous_coach(
+    inspection,
+):
+    first = Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    second = Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=2,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    repository = CoachRepository()
+
+    previous = repository.get_previous_coach(
+        inspection=inspection,
+        coach=second,
+    )
+
+    assert previous == first
+
+def test_get_previous_coach_none(
+    inspection,
+):
+    coach = Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    repository = CoachRepository()
+
+    previous = repository.get_previous_coach(
+        inspection=inspection,
+        coach=coach,
+    )
+
+    assert previous is None
+
+def test_get_next_coach(
+    inspection,
+):
+    first = Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    second = Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=2,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    repository = CoachRepository()
+
+    nxt = repository.get_next_coach(
+        inspection=inspection,
+        coach=first,
+    )
+
+    assert nxt == second
+
+def test_get_next_coach_none(
+    inspection,
+):
+    coach = Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )
+
+    repository = CoachRepository()
+
+    nxt = repository.get_next_coach(
+        inspection=inspection,
+        coach=coach,
+    )
+
+    assert nxt is None

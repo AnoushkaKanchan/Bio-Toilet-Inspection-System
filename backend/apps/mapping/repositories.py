@@ -64,6 +64,60 @@ class CoachRepository:
                 "inspection_sequence",
             )
         )
+    
+    def get_details(
+        self,
+        *,
+        inspection: Inspection,
+        coach_id,
+    ) -> Coach:
+        return (
+            Coach.objects
+            .select_related(
+                "ntes_coach",
+            )
+            .prefetch_related(
+                "tanks__defects",
+            )
+            .get(
+                inspection=inspection,
+                id=coach_id,
+            )
+        )
+    
+    def get_previous_coach(
+        self,
+        *,
+        inspection: Inspection,
+        coach: Coach,
+    ) -> Coach | None:
+        return (
+            Coach.objects.filter(
+                inspection=inspection,
+                inspection_sequence__lt=coach.inspection_sequence,
+            )
+            .order_by(
+                "-inspection_sequence",
+            )
+            .first()
+        )
+
+    def get_next_coach(
+        self,
+        *,
+        inspection: Inspection,
+        coach: Coach,
+    ) -> Coach | None:
+        return (
+            Coach.objects.filter(
+                inspection=inspection,
+                inspection_sequence__gt=coach.inspection_sequence,
+            )
+            .order_by(
+                "inspection_sequence",
+            )
+            .first()
+        )
 
 class TankRepository:
     def create(

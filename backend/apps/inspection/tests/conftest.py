@@ -14,6 +14,8 @@ from apps.ntes.services import (
     NTESVerificationService,
     SynchronizationService,
 )
+from apps.mapping.models import Coach, CoachInspectionStatus, MappingStatus
+from apps.ntes.models import NTESCoach
 
 pytestmark = pytest.mark.django_db
 
@@ -102,4 +104,27 @@ def workflow_service(
     return InspectionWorkflowService(
         repository=InspectionRepository(),
         synchronization_service=synchronization_service,
+    )
+@pytest.fixture
+def ntes_coach(
+    inspection,
+):
+    return NTESCoach.objects.create(
+        inspection=inspection,
+        coach_sequence=1,
+        coach_number="B1",
+        coach_type="3A",
+    )
+
+@pytest.fixture
+def coach(
+    inspection,
+    ntes_coach,
+):
+    return Coach.objects.create(
+        inspection=inspection,
+        ntes_coach=ntes_coach,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
     )

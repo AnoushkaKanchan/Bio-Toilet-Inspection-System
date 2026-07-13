@@ -103,3 +103,44 @@ class CoachListResponseDTO:
     train_number: str
     train_name: str | None
     coaches: list[CoachListItemDTO]
+
+@dataclass(frozen=True)
+class CoachInfoDTO:
+    number: str
+    type: str
+    status: str
+
+@dataclass(frozen=True)
+class CoachInspectionSummaryDTO:
+    left_status: str
+    right_status: str
+    overall_confidence: int
+
+@dataclass(frozen=True)
+class HealthDiagramDTO:
+    front_left: str
+    front_right: str
+    rear_left: str
+    rear_right: str
+    bio_tank: str
+
+@dataclass(frozen=True)
+class FindingDTO:
+    title: str
+    description: str
+    confidence: int
+
+@dataclass(frozen=True)
+class NavigationDTO:
+    previous: str | None
+    next: str | None
+
+@dataclass(frozen=True)
+class CoachInspectionReportDTO:
+    coach: CoachInfoDTO
+    inspection: CoachInspectionSummaryDTO
+    health_diagram: HealthDiagramDTO
+    findings: list[FindingDTO]
+    maintenance: list[str]
+    remarks: str
+    navigation: NavigationDTO

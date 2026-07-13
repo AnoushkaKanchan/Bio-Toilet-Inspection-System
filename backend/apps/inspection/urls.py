@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.inspection.views import (
+    CoachInspectionReportAPIView,
     CoachListAPIView,
     InspectionDetailsAPIView,
     InspectionListAPIView,
@@ -21,5 +22,10 @@ urlpatterns = [
         "inspection/<uuid:inspection_id>/coaches/",
         CoachListAPIView.as_view(),
         name="coach-list",
+    ),
+    path(
+        "inspection/<uuid:inspection_id>/coaches/<uuid:coach_id>/",
+        CoachInspectionReportAPIView.as_view(),
+        name="coach-details",
     ),
 ]

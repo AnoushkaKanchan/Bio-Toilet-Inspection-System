@@ -3,18 +3,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.inspection.models import Inspection
-from apps.inspection.serializers import (
-    InspectionDetailsItemSerializer,
-    InspectionListItemSerializer,
-)
 
 from apps.inspection.serializers import (
+    CoachInspectionReportSerializer,
     CoachListResponseSerializer,
     InspectionDetailsItemSerializer,
     InspectionListItemSerializer,
 )
 
 from apps.inspection.services import (
+    CoachInspectionReportService,
     CoachListService,
     InspectionDetailsService,
     InspectionListService,
@@ -30,11 +28,7 @@ class InspectionDetailsAPIView(APIView):
 
         self._service = InspectionDetailsService()
 
-    def get(
-        self,
-        request,
-        inspection_id,
-    ):
+    def get(self, request,inspection_id,):
         try:
             details = self._service.get_details(
                 inspection_id=inspection_id,
@@ -177,4 +171,54 @@ class CoachListAPIView(
         return Response(
             serializer.data,
         )
+class CoachInspectionReportAPIView(
+    APIView,
+):
 
+    def __init__(
+        self,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+
+        self._service = CoachInspectionReportService()
+
+    def get(
+        self,
+        request,
+        inspection_id,
+        coach_id,
+    ):
+        try:
+            report = self._service.get_report(
+                inspection_id=inspection_id,
+                coach_id=coach_id,
+            )
+
+        except (
+            Inspection.DoesNotExist,
+        ):
+            return Response(
+                {
+                    "success": False,
+                    "message": "Inspection not found.",
+                },
+                status=404,
+            )
+
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Coach not found.",
+                },
+                status=404,
+            )
+
+        serializer = CoachInspectionReportSerializer(
+            report,
+        )
+
+        return Response(
+            serializer.data,
+        )
