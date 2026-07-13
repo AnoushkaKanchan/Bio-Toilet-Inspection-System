@@ -8,7 +8,7 @@ def test_dashboard_status_endpoint():
     client = APIClient()
 
     response = client.get(
-        "/api/dashboard/status/",
+        "/api/v1/dashboard/status/",
     )
 
     assert response.status_code == 200

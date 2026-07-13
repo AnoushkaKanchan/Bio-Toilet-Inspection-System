@@ -13,7 +13,7 @@ def test_dashboard_summary_endpoint(
     client,
 ):
     response = client.get(
-        "/api/dashboard/summary/",
+        "/api/v1/dashboard/summary/",
     )
 
     assert response.status_code == 200
@@ -27,7 +27,7 @@ def test_live_pitlines_endpoint(
     client,
 ):
     response = client.get(
-        "/api/dashboard/live-pitlines/",
+        "/api/v1/dashboard/live-pitlines/",
     )
 
     assert response.status_code == 200
@@ -41,7 +41,7 @@ def test_operations_status_endpoint(
     client,
 ):
     response = client.get(
-        "/api/dashboard/status/",
+        "/api/v1/dashboard/status/",
     )
 
     assert response.status_code == 200
@@ -56,7 +56,7 @@ def test_recent_activity_endpoint(
     client,
 ):
     response = client.get(
-        "/api/dashboard/recent-activity/",
+        "/api/v1/dashboard/recent-activity/",
     )
 
     assert response.status_code == 200
@@ -71,7 +71,7 @@ def test_train_mapping_endpoint(
     inspection,
 ):
     response = client.get(
-        f"/api/dashboard/train-mapping/{inspection.id}/",
+        f"/api/v1/dashboard/train-mapping/{inspection.id}/",
     )
 
     assert response.status_code == 200

@@ -1,5 +1,3 @@
-from math import floor
-
 from apps.inspection.dto import InspectionListItemDTO
 from apps.inspection.models import InspectionStatus
 from apps.inspection.repositories import InspectionRepository
@@ -18,6 +16,7 @@ class InspectionListService:
         self,
         *,
         status: str | None = None,
+        search: str | None = None,
     ) -> list[InspectionListItemDTO]:
 
         if status is not None and status not in InspectionStatus.values:
@@ -25,6 +24,7 @@ class InspectionListService:
 
         inspections = self._repository.list(
             status=status,
+            search=search,
         )
 
         result = []
@@ -36,25 +36,13 @@ class InspectionListService:
                         inspection.id,
                     ),
                     train_number=inspection.train_number,
+                    # Temporary until train_name is available
+                    train_name=inspection.train_name,
+                    inspection_time=inspection.inspection_time,
                     pit_line=inspection.pit_line_number,
                     status=inspection.status,
-                    inspection_time=inspection.inspection_time,
-                    duration_minutes=self._duration_minutes(
-                        inspection,
-                    ),
-                    total_coaches=inspection.total_coaches,
-                    total_defects=inspection.total_defected_tanks,
+                    issue_count=inspection.total_defected_tanks,
                 )
             )
 
         return result
-
-    def _duration_minutes(
-        self,
-        inspection,
-    ) -> int:
-        duration = inspection.updated_at - inspection.inspection_time
-
-        return floor(
-            duration.total_seconds() / 60,
-        )

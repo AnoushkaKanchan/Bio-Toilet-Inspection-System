@@ -8,7 +8,7 @@ def test_live_pitlines_endpoint():
     client = APIClient()
 
     response = client.get(
-        "/api/dashboard/live-pitlines/",
+        "/api/v1/dashboard/live-pitlines/",
     )
 
     assert response.status_code == 200

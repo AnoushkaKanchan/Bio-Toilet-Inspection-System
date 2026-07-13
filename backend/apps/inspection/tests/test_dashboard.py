@@ -8,7 +8,7 @@ def test_dashboard_summary():
     client = APIClient()
 
     response = client.get(
-        "/api/dashboard/summary/",
+        "/api/v1/dashboard/summary/",
     )
 
     assert response.status_code == 200

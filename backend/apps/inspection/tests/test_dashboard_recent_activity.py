@@ -8,7 +8,7 @@ def test_recent_activity_endpoint():
     client = APIClient()
 
     response = client.get(
-        "/api/dashboard/recent-activity/",
+        "/api/v1/dashboard/recent-activity/",
     )
 
     assert response.status_code == 200

@@ -19,6 +19,13 @@ class Inspection(models.Model):
 
     train_number = models.CharField(max_length=20)
 
+    train_name = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text="Train name retrieved from NTES at the time of inspection creation.",
+    )
+
     pit_line_number = models.CharField(max_length=20)
 
     inspection_time = models.DateTimeField(

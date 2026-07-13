@@ -1,6 +1,11 @@
+from uuid import UUID
+
+from django.db.models import QuerySet
+from django.db.models.aggregates import Count
+
 from apps.inspection.dto import InspectionStatistics
 from apps.inspection.models import Inspection, InspectionStatus
-from apps.mapping.models import Coach, Tank
+from apps.mapping.models import Coach, Tank, TankDefect
 
 
 class InspectionRepository:
@@ -8,7 +13,7 @@ class InspectionRepository:
     def get(
         self,
         *,
-        inspection_id,
+        inspection_id: UUID,
     ) -> Inspection:
         return Inspection.objects.get(
             id=inspection_id,
@@ -96,15 +101,49 @@ class InspectionRepository:
     def list(
         self,
         *,
-        status: str | None = None,
-    ):
+        status: InspectionStatus | None = None,
+        search: str | None = None,
+    ) -> QuerySet:
+
         queryset = Inspection.objects.order_by(
-            "-created_at",
+            "-inspection_time",
         )
 
-        if status is not None:
+        if status:
             queryset = queryset.filter(
                 status=status,
             )
 
+        if search:
+            queryset = queryset.filter(
+                train_number__icontains=search,
+            )
+
         return queryset
+
+    def get_details(
+        self,
+        *,
+        inspection_id: UUID,
+    ) -> Inspection:
+        return self.get(
+            inspection_id=inspection_id,
+        )
+
+    def get_defect_summary(
+        self,
+        *,
+        inspection: Inspection,
+    ) -> QuerySet:
+        return (
+            TankDefect.objects.filter(
+                tank__coach__inspection=inspection,
+            )
+            .values(
+                "defect_type",
+            )
+            .annotate(
+                count=Count("id"),
+            )
+            .order_by()
+        )

@@ -10,7 +10,7 @@ def test_train_mapping_endpoint(
     client = APIClient()
 
     response = client.get(
-        f"/api/dashboard/train-mapping/{inspection.id}/",
+        f"/api/v1/dashboard/train-mapping/{inspection.id}/",
     )
 
     assert response.status_code == 200

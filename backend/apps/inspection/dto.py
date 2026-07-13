@@ -34,12 +34,50 @@ class RecentActivityDTO:
 
 
 @dataclass(frozen=True)
+class TrainInfoDTO:
+    number: str
+    name: str | None
+
+
+@dataclass(frozen=True)
+class InspectionSummaryDTO:
+    started_at: datetime
+    duration_minutes: int
+    coaches_detected: int
+    total_coaches: int
+    total_defects: int
+
+
+@dataclass(frozen=True)
+class DefectSummaryDTO:
+    pipe_not_connected: int
+    pipe_support_absent: int
+    surface_not_clean: int
+
+
+@dataclass(frozen=True)
+class MappingStatusDTO:
+    completed: bool
+    message: str
+
+
+@dataclass(frozen=True)
+class InspectionDetailsItemDTO:
+    inspection_id: str
+    status: str
+    pit_line: str
+    train: TrainInfoDTO
+    inspection: InspectionSummaryDTO
+    defect_summary: DefectSummaryDTO
+    mapping: MappingStatusDTO
+
+
+@dataclass(frozen=True)
 class InspectionListItemDTO:
     inspection_id: str
     train_number: str
+    train_name: str | None
+    inspection_time: datetime
     pit_line: str
     status: str
-    inspection_time: datetime
-    duration_minutes: int
-    total_coaches: int
-    total_defects: int
+    issue_count: int

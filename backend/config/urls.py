@@ -21,15 +21,15 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path(
-        "api/reports/",
+        "api/v1/reports/",
         include("apps.reports.urls"),
     ),
     path(
-        "api/dashboard/",
+        "api/v1/dashboard/",
         include("apps.inspection.api.urls"),
     ),
     path(
-        "api/",
+        "api/v1/",
         include("apps.inspection.urls"),
     ),
 ]

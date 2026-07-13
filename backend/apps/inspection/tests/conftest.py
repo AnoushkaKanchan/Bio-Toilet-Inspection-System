@@ -22,6 +22,7 @@ pytestmark = pytest.mark.django_db
 def inspection():
     return Inspection.objects.create(
         train_number="12951",
+        train_name="Rajdhani Exp",
         pit_line_number="P1",
         inspection_time=timezone.now(),
     )

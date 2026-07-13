@@ -10,7 +10,7 @@ def client():
 
 
 def test_dashboard_endpoint(client):
-    response = client.get("/api/reports/dashboard/")
+    response = client.get("/api/v1/reports/dashboard/")
 
     assert response.status_code == 200
     assert response["Content-Type"].startswith("application/json")
@@ -24,7 +24,7 @@ def test_dashboard_endpoint(client):
 
 def test_common_defects_endpoint(client):
     response = client.get(
-        "/api/reports/common-defects/",
+        "/api/v1/reports/common-defects/",
     )
 
     assert response.status_code == 200
@@ -37,7 +37,7 @@ def test_common_defects_endpoint(client):
 
 def test_export_daily(client):
     response = client.get(
-        "/api/reports/export/?type=daily",
+        "/api/v1/reports/export/?type=daily",
     )
 
     assert response.status_code == 200
@@ -52,7 +52,7 @@ def test_export_daily(client):
 
 def test_export_weekly(client):
     response = client.get(
-        "/api/reports/export/?type=weekly",
+        "/api/v1/reports/export/?type=weekly",
     )
 
     assert response.status_code == 200
@@ -67,7 +67,7 @@ def test_export_weekly(client):
 
 def test_export_monthly(client):
     response = client.get(
-        "/api/reports/export/?type=monthly",
+        "/api/v1/reports/export/?type=monthly",
     )
 
     assert response.status_code == 200

@@ -14,7 +14,7 @@ def test_inspection_list_integration(
     inspection,
 ):
     response = client.get(
-        "/api/inspections/",
+        "/api/v1/inspections/",
     )
 
     assert response.status_code == 200
@@ -35,7 +35,7 @@ def test_empty_inspection_list(
     client,
 ):
     response = client.get(
-        "/api/inspections/",
+        "/api/v1/inspections/",
     )
 
     assert response.status_code == 200
@@ -50,7 +50,7 @@ def test_invalid_status_filter(
     client,
 ):
     response = client.get(
-        "/api/inspections/?status=INVALID",
+        "/api/v1/inspections/?status=INVALID",
     )
 
     assert response.status_code == 400
@@ -65,7 +65,7 @@ def test_completed_status_filter(
     inspection,
 ):
     response = client.get(
-        "/api/inspections/?status=COMPLETED",
+        "/api/v1/inspections/?status=COMPLETED",
     )
 
     assert response.status_code == 200
