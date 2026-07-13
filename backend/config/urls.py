@@ -32,4 +32,10 @@ urlpatterns = [
         "api/v1/",
         include("apps.inspection.urls"),
     ),
+    path(
+        "api/v1/",
+        include(
+            "apps.common.urls",
+        ),
+),
 ]
