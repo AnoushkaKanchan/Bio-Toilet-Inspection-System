@@ -46,24 +46,33 @@ class RailwayMapper:
         payload: dict,
         reversed_coaches: list[NTESCoach],
     ) -> list[ResolvedCoach]:
-        resolved: list[ResolvedCoach] = []
+
+        grouped: dict[int, ResolvedCoach] = {}
 
         for tank in payload["tanks"]:
+
             ai_position = tank["coach_number"]
 
-            coach = self._resolve_coach_position(
-                ai_position,
-                reversed_coaches,
-            )
+            if ai_position not in grouped:
 
-            resolved.append(
-                ResolvedCoach(
+                coach = self._resolve_coach_position(
+                    ai_position,
+                    reversed_coaches,
+                )
+
+                grouped[ai_position] = ResolvedCoach(
                     ai_coach_number=ai_position,
                     ntes_coach=coach,
+                    tanks=[],
                 )
-            )
 
-        return resolved
+            grouped[
+                ai_position
+            ].tanks.append(tank,)
+
+        return list(
+            grouped.values(),
+        )
 
     def translate_defects(
         self,

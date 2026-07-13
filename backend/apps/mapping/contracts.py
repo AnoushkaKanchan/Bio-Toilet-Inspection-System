@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from apps.ntes.models import NTESCoach
 
@@ -7,3 +7,4 @@ from apps.ntes.models import NTESCoach
 class ResolvedCoach:
     ai_coach_number: int
     ntes_coach: NTESCoach
+    tanks: list[dict] = field(default_factory=list)
