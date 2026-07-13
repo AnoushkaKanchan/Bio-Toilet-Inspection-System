@@ -25,6 +25,19 @@ class AIResultRaw(models.Model):
         related_name="ai_results",
     )
 
+    inspection_run_id = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True,
+    )
+
+    status = models.CharField(
+        max_length=30,
+        null=True,
+        blank=True,
+    )
+
     payload = models.JSONField(
         help_text=(
             "Immutable raw JSON payload received from the AI service. "

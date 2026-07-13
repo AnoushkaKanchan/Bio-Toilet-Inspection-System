@@ -1,4 +1,7 @@
 from apps.ai.contracts import (
+    ALLOWED_TANK_FIELDS,
+    ALLOWED_TOP_LEVEL_FIELDS,
+    TANK_ID_PATTERN,
     TANK_REQUIRED_FIELDS,
     TOP_LEVEL_REQUIRED_FIELDS,
     VALID_CAMERA_SIDES,
@@ -15,6 +18,7 @@ class AIContractValidator:
     def validate(self, payload: dict) -> None:
         self._validate_payload(payload)
         self._validate_top_level_fields(payload)
+        self._validate_top_level_types(payload)
         self._validate_status(payload)
         self._validate_tanks(payload)
 
@@ -34,15 +38,27 @@ class AIContractValidator:
         field_name: str,
     ) -> None:
         if value not in valid_values:
-            raise AIContractError(f"Invalid {field_name}: {value}")
-
+            raise AIContractError(
+                f"Invalid {field_name}: {value!r}. "
+                f"Expected one of: {sorted(valid_values)}."
+            )
+        
     def _validate_numeric(
         self,
         value,
         field_name: str,
+        minimum: float | int | None = None,
+        maximum: float | int | None = None,
     ) -> None:
-        if not isinstance(value, (int, float)):
+        # Python evaluates isinstance(True, int) as True, so we must explicitly exclude bool
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise AIContractError(f"'{field_name}' must be numeric.")
+        
+        if minimum is not None and value < minimum:
+            raise AIContractError(f"'{field_name}' cannot be less than {minimum}.")
+            
+        if maximum is not None and value > maximum:
+            raise AIContractError(f"'{field_name}' cannot be greater than {maximum}.")
 
     def _validate_payload(self, payload: dict) -> None:
         if payload is None:
@@ -59,6 +75,26 @@ class AIContractValidator:
             payload,
             TOP_LEVEL_REQUIRED_FIELDS,
         )
+
+        # Reject unknown top-level fields using pre-computed set
+        unknown_fields = set(payload) - ALLOWED_TOP_LEVEL_FIELDS
+        if unknown_fields:
+            raise AIContractError(
+                f"Unknown top-level field(s): {sorted(unknown_fields)}"
+            )
+
+    def _validate_top_level_types(self, payload: dict) -> None:
+        if not isinstance(payload["inspection_run_id"], str) or not payload["inspection_run_id"].strip():
+            raise AIContractError("'inspection_run_id' must be a non-empty string.")
+
+        if not isinstance(payload["video_source"], str) or not payload["video_source"].strip():
+            raise AIContractError("'video_source' must be a non-empty string.")
+
+        if not isinstance(payload["train_inspection_timestamp"], str) or not payload["train_inspection_timestamp"].strip():
+            raise AIContractError("'train_inspection_timestamp' must be a non-empty string.")
+
+        if not isinstance(payload["summary"], dict):
+            raise AIContractError("'summary' must be a JSON object.")
 
     def _validate_status(
         self,
@@ -82,8 +118,17 @@ class AIContractValidator:
         if not tanks:
             raise AIContractError("'tanks' cannot be empty.")
 
+        seen_tanks = set()
+
         for tank in tanks:
             self._validate_tank(tank)
+            
+            tank_key = (tank["coach_number"], tank["tank_id"])
+            if tank_key in seen_tanks:
+                raise AIContractError(
+                    f"Duplicate tank record found for coach {tank['coach_number']}, tank ID '{tank['tank_id']}'."
+                )
+            seen_tanks.add(tank_key)
 
     def _validate_tank(
         self,
@@ -97,23 +142,31 @@ class AIContractValidator:
             TANK_REQUIRED_FIELDS,
         )
 
-        if not isinstance(
-            tank["coach_number"],
-            int,
-        ):
+        # Reject unknown tank fields using pre-computed set
+        unknown_fields = set(tank) - ALLOWED_TANK_FIELDS
+        if unknown_fields:
+            raise AIContractError(
+                f"Unknown tank field(s): {sorted(unknown_fields)}"
+            )
+
+        # Enforce exact type check for integer before checking bounds
+        if isinstance(tank["coach_number"], bool) or not isinstance(tank["coach_number"], int):
             raise AIContractError("'coach_number' must be an integer.")
+            
+        self._validate_numeric(
+            tank["coach_number"],
+            "coach_number",
+            minimum=0,
+        )
 
-        if not isinstance(
-            tank["tank_id"],
-            str,
-        ):
+        if not isinstance(tank["tank_id"], str):
             raise AIContractError("'tank_id' must be a string.")
+            
+        if not TANK_ID_PATTERN.match(tank["tank_id"]):
+            raise AIContractError(f"'tank_id' '{tank['tank_id']}' does not match the required pattern (e.g., L1, R2).")
 
-        if not isinstance(
-            tank["detection_image_path"],
-            str,
-        ):
-            raise AIContractError("'detection_image_path' must be a string.")
+        if not isinstance(tank["detection_image_path"], str) or not tank["detection_image_path"].strip():
+            raise AIContractError("'detection_image_path' must be a non-empty string.")
 
         self._validate_enum(
             tank["camera_side"],
@@ -149,15 +202,12 @@ class AIContractValidator:
         self._validate_numeric(
             tank["timestamp_sec"],
             "timestamp_sec",
+            minimum=0,
         )
 
         self._validate_numeric(
             tank["detection_confidence"],
             "detection_confidence",
+            minimum=0,
+            maximum=1,
         )
-
-        if tank["timestamp_sec"] < 0:
-            raise AIContractError("'timestamp_sec' cannot be negative.")
-
-        if not (0 <= tank["detection_confidence"] <= 1):
-            raise AIContractError("'detection_confidence' must be between 0 and 1.")
