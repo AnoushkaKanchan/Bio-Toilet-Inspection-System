@@ -93,3 +93,12 @@ class RailwayMappingPersistence:
         value: str,
     ) -> CameraSide:
         return CameraSide[value.upper()]
+    
+    def clear_mapping(
+        self,
+        *,
+        inspection: Inspection,
+    ) -> None:
+        self._coach_repository.delete_by_inspection(
+            inspection=inspection,
+        )

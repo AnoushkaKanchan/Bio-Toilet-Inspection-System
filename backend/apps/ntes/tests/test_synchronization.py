@@ -10,38 +10,37 @@ from apps.ntes.services.synchronization import (
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture
-def dependencies():
-    return {
+def create_service():
+    dependencies = {
         "client": Mock(),
         "parser": Mock(),
         "normalizer": Mock(),
         "repository": Mock(),
         "verifier": Mock(),
+        "ai_repository": Mock(),
+        "mapping_workflow": Mock(),
     }
 
-
-@pytest.fixture
-def service(
-    dependencies,
-):
     with patch(
         "apps.ntes.services.synchronization.transaction.atomic",
         return_value=nullcontext(),
     ):
-        yield SynchronizationService(
+        service = SynchronizationService(
             client=dependencies["client"],
             parser=dependencies["parser"],
             normalizer=dependencies["normalizer"],
             repository=dependencies["repository"],
             verifier=dependencies["verifier"],
+            ai_repository=dependencies["ai_repository"],
+            mapping_workflow=dependencies["mapping_workflow"],
         )
 
+    return service, dependencies
 
-def test_synchronize_success(
-    service,
-    dependencies,
-):
+
+def test_synchronize_success():
+    service, deps = create_service()
+
     inspection = Mock()
     inspection.id = 1
     inspection.train_number = "12951"
@@ -51,34 +50,103 @@ def test_synchronize_success(
     dtos = [Mock()]
     coaches = [Mock()]
 
-    dependencies["client"].fetch.return_value = html
-    dependencies["parser"].parse.return_value = raw
-    dependencies["normalizer"].normalize.return_value = dtos
-    dependencies["repository"].replace_composition.return_value = []
-    dependencies["verifier"].verify.return_value = coaches
+    deps["client"].fetch.return_value = html
+    deps["parser"].parse.return_value = raw
+    deps["normalizer"].normalize.return_value = dtos
+    deps["verifier"].verify.return_value = coaches
+    deps["ai_repository"].get_latest_by_inspection.return_value = None
 
     result = service.synchronize(
         inspection=inspection,
     )
 
-    dependencies["client"].fetch.assert_called_once_with(
+    deps["client"].fetch.assert_called_once_with(
         train_number="12951",
     )
-    dependencies["parser"].parse.assert_called_once_with(
+
+    deps["parser"].parse.assert_called_once_with(
         html=html,
     )
-    dependencies["normalizer"].normalize.assert_called_once_with(
+
+    deps["normalizer"].normalize.assert_called_once_with(
         coaches=raw,
     )
-    dependencies["repository"].replace_composition.assert_called_once_with(
+
+    deps["repository"].replace_composition.assert_called_once_with(
         inspection=inspection,
         coaches=dtos,
     )
-    dependencies["verifier"].verify.assert_called_once_with(
+
+    deps["verifier"].verify.assert_called_once_with(
         inspection=inspection,
     )
 
+    deps["ai_repository"].get_latest_by_inspection.assert_called_once_with(
+        inspection=inspection,
+    )
+
+    deps["mapping_workflow"].execute.assert_not_called()
+
     assert result == coaches
+
+
+def test_mapping_workflow_runs_when_ai_exists():
+    service, deps = create_service()
+
+    inspection = Mock()
+    inspection.id = 1
+    inspection.train_number = "12951"
+
+    html = "<html></html>"
+    raw = [Mock()]
+    dtos = [Mock()]
+    coaches = [Mock()]
+
+    ai_result = Mock()
+    ai_result.payload = {
+        "inspection_run_id": "run-1",
+    }
+
+    deps["client"].fetch.return_value = html
+    deps["parser"].parse.return_value = raw
+    deps["normalizer"].normalize.return_value = dtos
+    deps["verifier"].verify.return_value = coaches
+    deps["ai_repository"].get_latest_by_inspection.return_value = ai_result
+
+    service.synchronize(
+        inspection=inspection,
+    )
+
+    deps["mapping_workflow"].execute.assert_called_once_with(
+        inspection=inspection,
+        payload=ai_result.payload,
+        coaches=coaches,
+    )
+
+
+def test_mapping_workflow_skipped_when_ai_missing():
+    service, deps = create_service()
+
+    inspection = Mock()
+    inspection.id = 1
+    inspection.train_number = "12951"
+
+    html = "<html></html>"
+    raw = [Mock()]
+    dtos = [Mock()]
+    coaches = [Mock()]
+
+    deps["client"].fetch.return_value = html
+    deps["parser"].parse.return_value = raw
+    deps["normalizer"].normalize.return_value = dtos
+    deps["verifier"].verify.return_value = coaches
+    deps["ai_repository"].get_latest_by_inspection.return_value = None
+
+    service.synchronize(
+        inspection=inspection,
+    )
+
+    deps["mapping_workflow"].execute.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -91,11 +159,9 @@ def test_synchronize_success(
         "verifier",
     ],
 )
-def test_pipeline_stops_on_failure(
-    service,
-    dependencies,
-    stage,
-):
+def test_pipeline_stops_on_failure(stage):
+    service, deps = create_service()
+
     inspection = Mock()
     inspection.id = 1
     inspection.train_number = "12951"
@@ -104,26 +170,26 @@ def test_pipeline_stops_on_failure(
     raw = [Mock()]
     dtos = [Mock()]
 
-    dependencies["client"].fetch.return_value = html
-    dependencies["parser"].parse.return_value = raw
-    dependencies["normalizer"].normalize.return_value = dtos
+    deps["client"].fetch.return_value = html
+    deps["parser"].parse.return_value = raw
+    deps["normalizer"].normalize.return_value = dtos
 
     failure = RuntimeError("failure")
 
     if stage == "client":
-        dependencies["client"].fetch.side_effect = failure
+        deps["client"].fetch.side_effect = failure
 
     elif stage == "parser":
-        dependencies["parser"].parse.side_effect = failure
+        deps["parser"].parse.side_effect = failure
 
     elif stage == "normalizer":
-        dependencies["normalizer"].normalize.side_effect = failure
+        deps["normalizer"].normalize.side_effect = failure
 
     elif stage == "repository":
-        dependencies["repository"].replace_composition.side_effect = failure
+        deps["repository"].replace_composition.side_effect = failure
 
     else:
-        dependencies["verifier"].verify.side_effect = failure
+        deps["verifier"].verify.side_effect = failure
 
     with pytest.raises(RuntimeError):
         service.synchronize(
@@ -131,19 +197,19 @@ def test_pipeline_stops_on_failure(
         )
 
     if stage == "client":
-        dependencies["parser"].parse.assert_not_called()
-        dependencies["normalizer"].normalize.assert_not_called()
-        dependencies["repository"].replace_composition.assert_not_called()
-        dependencies["verifier"].verify.assert_not_called()
+        deps["parser"].parse.assert_not_called()
+        deps["normalizer"].normalize.assert_not_called()
+        deps["repository"].replace_composition.assert_not_called()
+        deps["verifier"].verify.assert_not_called()
 
     elif stage == "parser":
-        dependencies["normalizer"].normalize.assert_not_called()
-        dependencies["repository"].replace_composition.assert_not_called()
-        dependencies["verifier"].verify.assert_not_called()
+        deps["normalizer"].normalize.assert_not_called()
+        deps["repository"].replace_composition.assert_not_called()
+        deps["verifier"].verify.assert_not_called()
 
     elif stage == "normalizer":
-        dependencies["repository"].replace_composition.assert_not_called()
-        dependencies["verifier"].verify.assert_not_called()
+        deps["repository"].replace_composition.assert_not_called()
+        deps["verifier"].verify.assert_not_called()
 
     elif stage == "repository":
-        dependencies["verifier"].verify.assert_not_called()
+        deps["verifier"].verify.assert_not_called()

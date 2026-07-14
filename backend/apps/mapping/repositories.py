@@ -119,6 +119,15 @@ class CoachRepository:
             .first()
         )
 
+    def delete_by_inspection(
+        self,
+        *,
+        inspection: Inspection,
+    ) -> None:
+        Coach.objects.filter(
+            inspection=inspection,
+        ).delete()
+
 class TankRepository:
     def create(
         self,

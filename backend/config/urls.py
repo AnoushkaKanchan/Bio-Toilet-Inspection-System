@@ -34,8 +34,10 @@ urlpatterns = [
     ),
     path(
         "api/v1/",
-        include(
-            "apps.common.urls",
-        ),
-),
+        include("apps.common.urls",),
+    ),
+    path(
+        "api/v1/",
+        include("apps.ai.urls",),
+    ),
 ]

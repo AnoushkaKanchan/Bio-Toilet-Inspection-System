@@ -3,7 +3,9 @@ import time
 
 from django.db import transaction
 
+from apps.ai.repositories import AIResultRawRepository
 from apps.inspection.models import Inspection
+from apps.mapping.services.workflow import MappingWorkflowService
 from apps.ntes.clients import PlaywrightNTESClient
 from apps.ntes.models import NTESCoach
 from apps.ntes.normalizer import NTESNormalizer
@@ -23,6 +25,8 @@ class SynchronizationService:
         normalizer: NTESNormalizer | None = None,
         repository: NTESCoachRepository | None = None,
         verifier: NTESVerificationService | None = None,
+        ai_repository: AIResultRawRepository | None = None,
+        mapping_workflow: MappingWorkflowService | None = None,
     ) -> None:
         self._client = client or PlaywrightNTESClient()
         self._parser = parser or NTESHTMLParser()
@@ -31,6 +35,8 @@ class SynchronizationService:
         self._verifier = verifier or NTESVerificationService(
             repository=self._repository,
         )
+        self._ai_repository = ai_repository or AIResultRawRepository()
+        self._mapping_workflow = mapping_workflow or MappingWorkflowService()
 
     @transaction.atomic
     def synchronize(
@@ -66,6 +72,24 @@ class SynchronizationService:
         coaches = self._verifier.verify(
             inspection=inspection,
         )
+
+        # Check if an AI payload is already present for mapping
+        ai_result = self._ai_repository.get_latest_by_inspection(
+            inspection=inspection,
+        )
+
+        if ai_result :
+            logger.info("AI result detected. Delegating mapping workflow execution.")
+            
+            self._mapping_workflow.execute(
+                inspection=inspection,
+                payload=ai_result.payload,
+                coaches=coaches,
+            )
+        else:
+            logger.info(
+                "No AI result available. Mapping workflow skipped.",
+            )
 
         logger.info(
             "Completed NTES synchronization for inspection %s in %.2f seconds.",

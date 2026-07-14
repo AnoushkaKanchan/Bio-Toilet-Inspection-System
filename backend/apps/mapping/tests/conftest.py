@@ -71,3 +71,14 @@ def coach(
         mapping_status=MappingStatus.MATCHED,
         coach_inspection_status=CoachInspectionStatus.NORMAL,
     )
+
+@pytest.fixture
+def coach(
+    inspection,
+):
+    return Coach.objects.create(
+        inspection=inspection,
+        inspection_sequence=1,
+        mapping_status=MappingStatus.MATCHED,
+        coach_inspection_status=CoachInspectionStatus.NORMAL,
+    )

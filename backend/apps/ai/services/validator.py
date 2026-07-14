@@ -87,8 +87,19 @@ class AIContractValidator:
         if not isinstance(payload["inspection_run_id"], str) or not payload["inspection_run_id"].strip():
             raise AIContractError("'inspection_run_id' must be a non-empty string.")
 
-        if not isinstance(payload["video_source"], str) or not payload["video_source"].strip():
-            raise AIContractError("'video_source' must be a non-empty string.")
+        video_source = payload["video_source"]
+        if not isinstance(video_source, dict):
+            raise AIContractError("'video_source' must be an object.")
+
+        for field in ("left_camera", "right_camera"):
+            if (
+                field not in video_source
+                or not isinstance(video_source[field], str)
+                or not video_source[field].strip()
+            ):
+                raise AIContractError(
+                    f"'video_source.{field}' must be a non-empty string."
+                )
 
         if not isinstance(payload["train_inspection_timestamp"], str) or not payload["train_inspection_timestamp"].strip():
             raise AIContractError("'train_inspection_timestamp' must be a non-empty string.")

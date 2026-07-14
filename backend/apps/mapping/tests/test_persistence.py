@@ -95,3 +95,20 @@ def test_create_tank_defects_uses_repository(
         ],
         confidence=Decimal("96.20"),
     )
+
+def test_clear_mapping_uses_repository(
+    inspection,
+):
+    repository = Mock()
+
+    persistence = RailwayMappingPersistence(
+        coach_repository=repository,
+    )
+
+    persistence.clear_mapping(
+        inspection=inspection,
+    )
+
+    repository.delete_by_inspection.assert_called_once_with(
+        inspection=inspection,
+    )

@@ -3,6 +3,7 @@ from apps.mapping.contracts import ResolvedCoach
 from apps.mapping.enums import TankDefectType
 from apps.mapping.exceptions import MappingValidationError
 from apps.ntes.models import NTESCoach
+from apps.mapping.models import Coach
 
 
 class RailwayMapper:
@@ -88,3 +89,4 @@ class RailwayMapper:
                 defects.append(defect)
 
         return defects
+

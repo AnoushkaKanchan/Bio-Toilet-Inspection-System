@@ -262,3 +262,20 @@ def test_get_next_coach_none(
     )
 
     assert nxt is None
+
+def test_delete_by_inspection(
+    inspection,
+    mapped_coach,
+):
+    repository = CoachRepository()
+
+    repository.delete_by_inspection(
+        inspection=inspection,
+    )
+
+    assert (
+        Coach.objects.filter(
+            inspection=inspection,
+        ).count()
+        == 0
+    )

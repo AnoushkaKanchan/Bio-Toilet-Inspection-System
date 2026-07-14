@@ -24,13 +24,6 @@ class AIResultRawRepository:
         status: str,
         payload: dict,
     ) -> AIResultRaw:
-        """
-        Persist a new immutable AI payload.
-
-        Raises:
-            DuplicateAIResultError:
-                If the inspection_run_id already exists.
-        """
         try:
             return AIResultRaw.objects.create(
                 inspection=inspection,
@@ -38,12 +31,10 @@ class AIResultRawRepository:
                 status=status,
                 payload=payload,
             )
-
         except IntegrityError as exc:
             raise DuplicateAIResultError(
                 f"AI result '{inspection_run_id}' already exists."
             ) from exc
-
         except Exception as exc:
             raise AIPersistenceError(
                 "Failed to persist AI result."
@@ -54,17 +45,10 @@ class AIResultRawRepository:
         *,
         inspection_run_id: str,
     ) -> AIResultRaw:
-        """
-        Retrieve a persisted AI result.
-
-        Raises:
-            AIResultNotFoundError
-        """
         try:
             return AIResultRaw.objects.get(
                 inspection_run_id=inspection_run_id,
             )
-
         except AIResultRaw.DoesNotExist as exc:
             raise AIResultNotFoundError(
                 f"AI result '{inspection_run_id}' does not exist."
@@ -75,9 +59,6 @@ class AIResultRawRepository:
         *,
         inspection_run_id: str,
     ) -> bool:
-        """
-        Check whether an AI inspection run has already been stored.
-        """
         return AIResultRaw.objects.filter(
             inspection_run_id=inspection_run_id,
         ).exists()
@@ -87,13 +68,21 @@ class AIResultRawRepository:
         *,
         inspection: Inspection,
     ) -> list[AIResultRaw]:
-        """
-        Retrieve all AI results belonging to an inspection.
-
-        Results are ordered newest first according to the model Meta.
-        """
         return list(
             AIResultRaw.objects.filter(
                 inspection=inspection,
             )
         )
+
+    def get_latest_by_inspection(
+        self,
+        *,
+        inspection: Inspection,
+    ) -> AIResultRaw | None:
+        """
+        Retrieve the latest persisted AI payload for an inspection context.
+        Uses default model sorting (newest first) to fetch the top record.
+        """
+        return AIResultRaw.objects.filter(
+            inspection=inspection,
+        ).first()
