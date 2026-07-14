@@ -40,4 +40,10 @@ urlpatterns = [
         "api/v1/",
         include("apps.ai.urls",),
     ),
+    path(
+        "api/v1/",
+        include(
+            "apps.ntes.urls",
+        ),
+    ),
 ]

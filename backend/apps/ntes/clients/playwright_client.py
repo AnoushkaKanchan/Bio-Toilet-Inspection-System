@@ -123,7 +123,7 @@ class PlaywrightNTESClient:
             playwright,
             settings.NTES_BROWSER,
         )
-
+        # temporary
         browser = browser_launcher.launch(
             headless=settings.NTES_HEADLESS,
         )
@@ -154,7 +154,7 @@ class PlaywrightNTESClient:
         try:
             page.goto(
                 settings.NTES_BASE_URL,
-                wait_until="networkidle",
+                wait_until="domcontentloaded",
                 timeout=settings.NTES_TIMEOUT_MS,
             )
 
@@ -180,24 +180,39 @@ class PlaywrightNTESClient:
                 train_number,
             )
 
-            search_button = page.locator("span[onclick=\"onTrainInputFind('S');\"]")
+            search_button = page.locator(
+                "span[onclick=\"onTrainInputFind('S');\"]",
+            )
 
             search_button.click()
 
-            page.locator(".w3-panel.w3-red").or_(
-                page.get_by_role(
-                    "button",
-                    name="Coach Position",
+            coach_button = (
+                page.locator(
+                    "button[data-bs-toggle='modal']",
                 )
-            ).first.wait_for(
+                .filter(
+                    has_text="Coach Position",
+                )
+                .first
+            )
+
+            page.locator(
+                ".w3-panel.w3-red",
+            ).or_(
+                coach_button,
+            ).wait_for(
                 state="visible",
                 timeout=settings.NTES_TIMEOUT_MS,
             )
 
-            logger.info("Train search completed.")
+            logger.info(
+                "Train search completed.",
+            )
 
         except PlaywrightTimeoutError as exc:
-            raise NTESClientTimeoutError("Timed out while searching train.") from exc
+            raise NTESClientTimeoutError(
+                "Timed out while searching train.",
+            ) from exc
 
     def _check_invalid_train(
         self,
@@ -219,50 +234,65 @@ class PlaywrightNTESClient:
         self,
         page: Page,
     ) -> None:
-        logger.info("Opening Coach Position modal.")
+        logger.info(
+            "Opening Coach Position modal.",
+        )
 
         try:
-            coach_button = page.get_by_role(
-                "button",
-                name="Coach Position",
+            coach_button = (
+                page.locator(
+                    "button[data-bs-toggle='modal']",
+                )
+                .filter(
+                    has_text="Coach Position",
+                )
+                .first
             )
 
-            try:
-                coach_button.wait_for(
-                    state="visible",
-                    timeout=settings.NTES_TIMEOUT_MS,
-                )
-            except PlaywrightTimeoutError:
-                coach_button = page.locator("button[data-bs-toggle='modal']")
+            coach_button.wait_for(
+                state="visible",
+                timeout=settings.NTES_TIMEOUT_MS,
+            )
 
-                coach_button.wait_for(
-                    state="visible",
-                    timeout=settings.NTES_TIMEOUT_MS,
-                )
+            coach_button.scroll_into_view_if_needed()
 
-            coach_button.first.click()
+            coach_button.click(
+                force=True,
+            )
+
+            page.locator(
+                ".modal.show",
+            ).wait_for(
+                state="visible",
+                timeout=settings.NTES_TIMEOUT_MS,
+            )
+
+            logger.info(
+                "Coach Position modal opened.",
+            )
 
         except PlaywrightTimeoutError as exc:
             raise NTESClientTimeoutError(
-                "Timed out while opening Coach Position."
+                "Timed out while opening Coach Position.",
             ) from exc
-
-        except CoachCompositionNotFoundError:
-            raise
 
         except Exception as exc:
             raise CoachCompositionNotFoundError(
-                "Coach Position button not found."
+                "Coach Position button not found.",
             ) from exc
 
     def _extract_modal_html(
         self,
         page: Page,
     ) -> str:
-        logger.info("Extracting Coach Position modal HTML.")
+        logger.info(
+            "Extracting Coach Position modal HTML.",
+        )
 
         try:
-            modal = page.locator(".modal-body")
+            modal = page.locator(
+                ".modal.show .modal-body",
+            )
 
             modal.wait_for(
                 state="visible",
@@ -272,13 +302,15 @@ class PlaywrightNTESClient:
             html = modal.inner_html().strip()
 
             if not html:
-                raise CoachCompositionNotFoundError("Coach Position modal is empty.")
+                raise CoachCompositionNotFoundError(
+                    "Coach Position modal is empty.",
+                )
 
             return html
 
         except PlaywrightTimeoutError as exc:
             raise NTESClientTimeoutError(
-                "Timed out while waiting for Coach Position modal."
+                "Timed out while waiting for Coach Position modal.",
             ) from exc
 
     def _cleanup(

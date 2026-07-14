@@ -21,3 +21,10 @@ class NTESCoachDTO:
     coach_sequence: int
     coach_number: str
     coach_type: str
+
+@dataclass(slots=True)
+class FetchTrainResponseDTO:
+    success: bool
+    inspection_id: str
+    coaches_synchronized: int
+    mapping_executed: bool
