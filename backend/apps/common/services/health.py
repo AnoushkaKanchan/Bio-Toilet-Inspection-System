@@ -2,8 +2,8 @@ from apps.common.dto import (
     ServiceStatusDTO,
     SystemStatusDTO,
 )
-from apps.common.repositories import (
-    SettingsRepository,
+from apps.common.health_repository import (
+    HealthRepository,
 )
 
 
@@ -12,34 +12,56 @@ class HealthService:
     def __init__(
         self,
         *,
-        repository: SettingsRepository | None = None,
-    ) -> None:
+        repository: HealthRepository | None = None,
+    ):
         self._repository = (
             repository
-            or SettingsRepository()
+            or HealthRepository()
         )
 
     def get_system_status(
         self,
     ) -> SystemStatusDTO:
 
+        database_status = (
+            "ONLINE"
+            if self._repository.is_database_online()
+            else "OFFLINE"
+        )
+
+        backend_status = (
+            "ONLINE"
+            if database_status == "ONLINE"
+            else "DEGRADED"
+        )
+        
         services = [
             ServiceStatusDTO(
                 name="AI Inference Engine",
-                status="ONLINE",
+                status="UNKNOWN",
             ),
             ServiceStatusDTO(
                 name="Camera Network",
-                status="ONLINE",
+                status="UNKNOWN",
             ),
             ServiceStatusDTO(
                 name="Backend Connection",
-                status="ONLINE",
+                status=backend_status,
+            ),
+            ServiceStatusDTO(
+                name="Database",
+                status=database_status,
             ),
         ]
 
+        overall = (
+            "ONLINE"
+            if database_status == "ONLINE"
+            else "DEGRADED"
+        )
+
         return SystemStatusDTO(
-            overall="ONLINE",
-            last_updated=self._repository.get_last_updated(),
+            overall=overall,
+            last_updated=self._repository.get_timestamp(),
             services=services,
         )

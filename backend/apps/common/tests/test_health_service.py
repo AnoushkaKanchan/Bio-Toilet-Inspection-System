@@ -34,12 +34,9 @@ def test_services():
 
     status = service.get_system_status()
 
-    assert len(
-        status.services,
-    ) == 3
+    assert len(status.services) == 4
 
-    assert status.services[0].name == "AI Inference Engine"
-
-    assert status.services[1].name == "Camera Network"
-
-    assert status.services[2].name == "Backend Connection"
+    assert status.services[0].status == "UNKNOWN"
+    assert status.services[1].status == "UNKNOWN"
+    assert status.services[2].status == "ONLINE"
+    assert status.services[3].status == "ONLINE"

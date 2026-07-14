@@ -86,6 +86,4 @@ def test_service_count():
 
     services = response.json()["system_status"]["services"]
 
-    assert len(
-        services,
-    ) == 3
+    assert len(services) == 4

@@ -10,6 +10,7 @@ from apps.common.repositories import (
 from apps.common.services.health import (
     HealthService,
 )
+from apps.common.health_repository import HealthRepository
 
 
 class SettingsService:
@@ -28,9 +29,7 @@ class SettingsService:
 
         self._health_service = (
             health_service
-            or HealthService(
-                repository=self._repository,
-            )
+            or HealthService()
         )
 
     def get_settings(
