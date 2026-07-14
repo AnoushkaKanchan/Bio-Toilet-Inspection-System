@@ -1,3 +1,201 @@
+import uuid
+
 from django.db import models
 
-# Create your models here.
+from apps.inspection.models import Inspection
+from apps.ntes.models import NTESCoach
+
+
+class MappingStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    MATCHED = "MATCHED", "Matched"
+    UNMATCHED = "UNMATCHED", "Unmatched"
+
+
+class CoachInspectionStatus(models.TextChoices):
+    NORMAL = "NORMAL", "Normal"
+    DEFECT = "DEFECT", "Defect"
+
+
+class CameraSide(models.TextChoices):
+    LEFT = "LEFT", "Left"
+    RIGHT = "RIGHT", "Right"
+
+
+class Coach(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    inspection = models.ForeignKey(
+        Inspection,
+        on_delete=models.CASCADE,
+        related_name="coaches",
+    )
+
+    ntes_coach = models.OneToOneField(
+        NTESCoach,
+        on_delete=models.CASCADE,
+        related_name="mapped_coach",
+        null=True,
+        blank=True,
+    )
+
+    inspection_sequence = models.PositiveIntegerField(
+        help_text=(
+            "Coach sequence used for this inspection after the Mapping Engine "
+            "applies pit-line direction and mapping rules."
+        ),
+    )
+
+    mapping_status = models.CharField(
+        max_length=20,
+        choices=MappingStatus.choices,
+        default=MappingStatus.PENDING,
+    )
+
+    coach_inspection_status = models.CharField(
+        max_length=20,
+        choices=CoachInspectionStatus.choices,
+        default=CoachInspectionStatus.NORMAL,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "coach"
+        ordering = ["inspection_sequence"]
+        verbose_name = "Coach"
+        verbose_name_plural = "Coaches"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["inspection", "inspection_sequence"],
+                name="unique_inspection_sequence_per_inspection",
+            ),
+        ]
+
+    def __str__(self):
+        coach_number = self.ntes_coach.coach_number if self.ntes_coach else "UNMATCHED"
+        return f"{self.inspection_sequence} - {coach_number}"
+
+
+class Tank(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    coach = models.ForeignKey(
+        Coach,
+        on_delete=models.CASCADE,
+        related_name="tanks",
+    )
+
+    tank_identifier = models.CharField(
+        max_length=20,
+        help_text="Globally unique tank identifier returned by the AI (e.g. L32, R15).",
+    )
+
+    camera = models.CharField(
+        max_length=5,
+        choices=CameraSide.choices,
+    )
+
+    timestamp_seconds = models.DecimalField(
+        max_digits=10,
+        decimal_places=3,
+        help_text="Timestamp (in seconds) within the inspection video.",
+    )
+
+    confidence = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        help_text="AI confidence score.",
+    )
+
+    evidence_image_path = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text="Path to the AI-generated evidence image.",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "tank"
+        ordering = ["tank_identifier"]
+        verbose_name = "Tank"
+        verbose_name_plural = "Tanks"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tank_identifier"],
+                name="unique_tank_identifier",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.tank_identifier} ({self.camera})"
+
+
+class TankDefect(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    tank = models.ForeignKey(
+        Tank,
+        on_delete=models.CASCADE,
+        related_name="defects",
+    )
+
+    defect_type = models.CharField(
+        max_length=100,
+        help_text="Raw defect label returned by the AI service.",
+    )
+
+    confidence = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        help_text="AI confidence score for the detected defect.",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "tank_defect"
+        ordering = ["id", "created_at"]
+        verbose_name = "Tank Defect"
+        verbose_name_plural = "Tank Defects"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tank", "defect_type"],
+                name="unique_defect_per_tank",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.defect_type} ({self.confidence}%)"

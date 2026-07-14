@@ -1,0 +1,2 @@
+class NTESValidator:
+    pass

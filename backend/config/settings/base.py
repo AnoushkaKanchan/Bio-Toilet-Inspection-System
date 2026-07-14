@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -34,24 +34,34 @@ if not SECRET_KEY:
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "").split(",")
-    if host.strip()
+    host.strip() for host in os.getenv("ALLOWED_HOSTS", "").split(",") if host.strip()
 ]
 
 # Application definition
 
 INSTALLED_APPS = [
+    # Django apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Third-party apps
+    "rest_framework",
+    "corsheaders",
+    # Local apps
+    "apps.inspection",
+    "apps.ai",
+    "apps.ntes",
+    "apps.mapping",
+    "apps.reports",
+    "apps.common",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -85,10 +95,64 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
+
+# -------------------------------------------------------------------
+# NTES Runtime Configuration
+# -------------------------------------------------------------------
+
+NTES_BASE_URL = os.getenv(
+    "NTES_BASE_URL",
+    "https://enquiry.indianrail.gov.in/mntes/",
+)
+
+NTES_BROWSER = os.getenv(
+    "NTES_BROWSER",
+    "chromium",
+)
+
+NTES_HEADLESS = (
+    os.getenv(
+        "NTES_HEADLESS",
+        "True",
+    ).lower()
+    == "true"
+)
+
+NTES_TIMEOUT_SECONDS = int(
+    os.getenv(
+        "NTES_TIMEOUT_SECONDS",
+        "30",
+    )
+)
+
+NTES_TIMEOUT_MS = NTES_TIMEOUT_SECONDS * 1000
+
+NTES_MAX_RETRIES = int(
+    os.getenv(
+        "NTES_MAX_RETRIES",
+        "2",
+    )
+)
+
+NTES_USER_AGENT = os.getenv(
+    "NTES_USER_AGENT",
+    (
+        "Mozilla/5.0 "
+        "(Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 "
+        "(KHTML, like Gecko) "
+        "Chrome/138.0.0.0 "
+        "Safari/537.36"
+    ),
+)
 
 
 # Password validation
@@ -96,16 +160,19 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": ("django.contrib.auth.password_validation." "MinimumLengthValidator"),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": ("django.contrib.auth.password_validation." "CommonPasswordValidator"),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": ("django.contrib.auth.password_validation." "NumericPasswordValidator"),
     },
 ]
 
@@ -115,14 +182,31 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+}
+
+# CORS (Development)
+CORS_ALLOW_ALL_ORIGINS = True
