@@ -147,3 +147,19 @@ class InspectionRepository:
             )
             .order_by()
         )
+
+    def assign_train(
+        self,
+        *,
+        inspection: Inspection,
+        train_number: str,
+    ) -> Inspection:
+        inspection.train_number = train_number
+
+        inspection.save(
+            update_fields=[
+                "train_number",
+            ],
+        )
+
+        return inspection

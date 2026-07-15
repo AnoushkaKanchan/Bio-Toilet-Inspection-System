@@ -17,7 +17,11 @@ class Inspection(models.Model):
         editable=False,
     )
 
-    train_number = models.CharField(max_length=20)
+    train_number = models.CharField(    
+        max_length=20,
+        blank=True,
+        null=True,
+    )
 
     train_name = models.CharField(
         max_length=225,

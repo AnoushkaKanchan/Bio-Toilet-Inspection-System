@@ -34,6 +34,7 @@ class FetchTrainService:
         self,
         *,
         inspection_id,
+        train_number,
     ) -> FetchTrainResponseDTO:
 
         inspection = (
@@ -42,6 +43,11 @@ class FetchTrainService:
             )
         )
 
+        inspection = self._inspection_repository.assign_train(
+            inspection=inspection,
+            train_number=train_number,
+        )
+        
         coaches = (
             self._synchronization_service.synchronize(
                 inspection=inspection,
