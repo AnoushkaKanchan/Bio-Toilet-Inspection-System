@@ -42,7 +42,7 @@ class DashboardService:
                     "status": inspection.status,
                     "started_at": inspection.created_at.isoformat(),
                     "defects": inspection.total_defected_tanks,
-                    "inspected_coaches": inspection.total_coaches,
+                    "inspected_coaches": 0,
                     "total_coaches": inspection.total_coaches,
                 }
             )

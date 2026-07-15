@@ -1,0 +1,3 @@
+Note
+
+One improvement over the original architecture: ExportView currently returns JSON because your ExportService also returns DTOs. When you implement real PDF generation later, only ExportService and ExportView will need to change to return a FileResponse; the repository and the rest of the Reports bounded context can remain unchanged.

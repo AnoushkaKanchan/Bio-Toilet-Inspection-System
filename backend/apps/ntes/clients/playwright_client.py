@@ -29,7 +29,7 @@ class PlaywrightNTESClient:
         self,
         *,
         train_number: str,
-    ) -> str:
+    ) -> dict[str, str]:
         start = time.monotonic()
 
         playwright = None
@@ -63,8 +63,13 @@ class PlaywrightNTESClient:
                 page,
             )
 
-            self._open_coach_position(
+            train_name = self._extract_train_name(
                 page,
+                train_number,
+            )
+
+            self._open_coach_position(
+             page,
             )
 
             html = self._extract_modal_html(
@@ -76,7 +81,10 @@ class PlaywrightNTESClient:
                 train_number,
             )
 
-            return html
+            return {
+                "html": html,
+                "train_name": train_name,
+            }
 
         except PlaywrightTimeoutError as exc:
             logger.exception(
@@ -125,7 +133,8 @@ class PlaywrightNTESClient:
         )
         # temporary
         browser = browser_launcher.launch(
-            headless=settings.NTES_HEADLESS,
+            headless=False,
+            slow_mo=500,
         )
 
         context = browser.new_context(
@@ -338,3 +347,43 @@ class PlaywrightNTESClient:
                 playwright.stop()
             except Exception:
                 logger.exception("Failed to stop Playwright.")
+
+    def _extract_train_name(
+        self,
+        page: Page,
+        train_number: str,
+    ) -> str:
+        logger.info(
+            "Extracting train name for train %s.",
+            train_number,
+        )
+
+        try:
+            heading = page.locator(
+                ".w3-panel.w3-round.w3-blue h3",
+            ).filter(
+                has_text=train_number,
+            )
+
+            heading.wait_for(
+                state="visible",
+                timeout=settings.NTES_TIMEOUT_MS,
+            )
+
+            full_text = heading.inner_text().strip()
+
+            train_name = full_text.removeprefix(
+                train_number,
+            ).strip()
+
+            if not train_name:
+                raise CoachCompositionNotFoundError(
+                    "Train name not found in results panel.",
+                )
+
+            return train_name
+
+        except PlaywrightTimeoutError as exc:
+            raise NTESClientTimeoutError(
+                "Timed out while waiting for train name.",
+            ) from exc

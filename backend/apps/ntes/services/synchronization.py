@@ -52,12 +52,17 @@ class SynchronizationService:
             inspection.train_number,
         )
 
-        html = self._client.fetch(
+        html_result = self._client.fetch(
             train_number=inspection.train_number,
         )
 
+        inspection.train_name = html_result["train_name"]
+        inspection.save(
+            update_fields=["train_name"],
+        )
+
         raw_coaches = self._parser.parse(
-            html=html,
+            html=html_result["html"],
         )
 
         coach_dtos = self._normalizer.normalize(
