@@ -82,12 +82,7 @@ class InspectionDetailsService:
             mapping=mapping,
         )
 
-    def _duration_minutes(
-        self,
-        inspection: Inspection,
-    ) -> int:
+    def _duration_minutes(self, inspection: Inspection) -> int:
         duration = inspection.updated_at - inspection.inspection_time
-
-        return floor(
-            duration.total_seconds() / 60,
-        )
+        minutes = floor(duration.total_seconds() / 60)
+        return max(minutes, 0)

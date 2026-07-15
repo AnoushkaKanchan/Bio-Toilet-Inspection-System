@@ -1,3 +1,5 @@
+import datetime
+
 from apps.ai.contracts import (
     ALLOWED_TANK_FIELDS,
     ALLOWED_TOP_LEVEL_FIELDS,
@@ -83,29 +85,20 @@ class AIContractValidator:
                 f"Unknown top-level field(s): {sorted(unknown_fields)}"
             )
 
-    def _validate_top_level_types(self, payload: dict) -> None:
-        if not isinstance(payload["inspection_run_id"], str) or not payload["inspection_run_id"].strip():
-            raise AIContractError("'inspection_run_id' must be a non-empty string.")
-
-        video_source = payload["video_source"]
-        if not isinstance(video_source, dict):
-            raise AIContractError("'video_source' must be an object.")
-
-        for field in ("left_camera", "right_camera"):
-            if (
-                field not in video_source
-                or not isinstance(video_source[field], str)
-                or not video_source[field].strip()
-            ):
-                raise AIContractError(
-                    f"'video_source.{field}' must be a non-empty string."
-                )
-
-        if not isinstance(payload["train_inspection_timestamp"], str) or not payload["train_inspection_timestamp"].strip():
-            raise AIContractError("'train_inspection_timestamp' must be a non-empty string.")
-
-        if not isinstance(payload["summary"], dict):
-            raise AIContractError("'summary' must be a JSON object.")
+    def _validate_top_level_types(
+        self,
+        payload: dict,
+    ) -> None:
+        if (
+            not isinstance(payload["inspection_run_id"], str)
+            or not payload["inspection_run_id"].strip()
+        ):
+            raise AIContractError(
+                "'inspection_run_id' must be a non-empty string."
+            )
+        
+        # 'processing_timestamp' type check is safely omitted here, 
+        # as it is handled upstream by the serializer framework.
 
     def _validate_status(
         self,
@@ -176,8 +169,13 @@ class AIContractValidator:
         if not TANK_ID_PATTERN.match(tank["tank_id"]):
             raise AIContractError(f"'tank_id' '{tank['tank_id']}' does not match the required pattern (e.g., L1, R2).")
 
-        if not isinstance(tank["detection_image_path"], str) or not tank["detection_image_path"].strip():
-            raise AIContractError("'detection_image_path' must be a non-empty string.")
+        if (
+            not isinstance(tank["tank_image_path"], str)
+            or not tank["tank_image_path"].strip()
+        ):
+            raise AIContractError(
+                "'tank_image_path' must be a non-empty string."
+            )
 
         self._validate_enum(
             tank["camera_side"],

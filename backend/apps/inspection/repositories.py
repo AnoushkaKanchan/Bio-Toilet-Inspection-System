@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID
 
 from django.db.models import QuerySet
@@ -81,7 +82,7 @@ class InspectionRepository:
     ) -> list[Inspection]:
         return list(
             Inspection.objects.filter(
-                status=InspectionStatus.PROCESSING,
+                status=InspectionStatus.AWAITING_TRAIN_NUMBER,
             ).order_by(
                 "created_at",
             )
@@ -146,4 +147,33 @@ class InspectionRepository:
                 count=Count("id"),
             )
             .order_by()
+        )
+
+    def assign_train(
+        self,
+        *,
+        inspection: Inspection,
+        train_number: str,
+    ) -> Inspection:
+        inspection.train_number = train_number
+
+        inspection.save(
+            update_fields=[
+                "train_number",
+            ],
+        )
+
+        return inspection
+
+    def create(
+        self,
+        *,
+        pit_line_number: str,
+        inspection_time: datetime,
+    ) -> Inspection:
+        return Inspection.objects.create(
+            pit_line_number=pit_line_number,
+            inspection_time=inspection_time,
+            train_number=None,
+            status=InspectionStatus.AWAITING_TRAIN_NUMBER,
         )

@@ -54,8 +54,9 @@ class RailwayMappingPersistence:
         camera = tank_data["camera_side"]
         timestamp = tank_data["timestamp_sec"]
         confidence = tank_data["detection_confidence"]
-        evidence_image_path = tank_data["detection_image_path"]
-
+        # apps/mapping/services/persistence.py, create_tank()
+        evidence_image_path = tank_data["tank_image_path"]
+        
         return self._tank_repository.create(
             coach=coach,
             tank_identifier=tank_identifier,

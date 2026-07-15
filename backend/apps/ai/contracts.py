@@ -2,11 +2,9 @@ import re
 
 TOP_LEVEL_REQUIRED_FIELDS = (
     "inspection_run_id",
-    "train_inspection_timestamp",
-    "video_source",
-    "tanks",
-    "summary",
+    "processing_timestamp",
     "status",
+    "tanks",
 )
 
 TANK_REQUIRED_FIELDS = (
@@ -15,15 +13,15 @@ TANK_REQUIRED_FIELDS = (
     "camera_side",
     "timestamp_sec",
     "pipe_status",
+    "pipe_support_status",
     "surface_status",
     "maintenance_status",
     "detection_confidence",
-    "detection_image_path",
+    "tank_image_path",
 )
 
 OPTIONAL_TANK_FIELDS = (
     "synced_tank_id",
-    "pipe_support_status",
 )
 
 # Centralized Tank ID regex validation pattern (e.g., L1, R2, L10)

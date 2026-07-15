@@ -4,10 +4,30 @@ from django.db import models
 
 
 class InspectionStatus(models.TextChoices):
-    PENDING = "PENDING", "Pending"
-    PROCESSING = "PROCESSING", "Processing"
-    COMPLETED = "COMPLETED", "Completed"
-    FAILED = "FAILED", "Failed"
+    SCANNING = (
+        "SCANNING",
+        "Scanning",
+    )
+
+    AWAITING_TRAIN_NUMBER = (
+        "AWAITING_TRAIN_NUMBER",
+        "Awaiting Train Number",
+    )
+
+    MAPPING = (
+        "MAPPING",
+        "Mapping",
+    )
+
+    COMPLETED = (
+        "COMPLETED",
+        "Completed",
+    )
+
+    FAILED = (
+        "FAILED",
+        "Failed",
+    )
 
 
 class Inspection(models.Model):
@@ -17,7 +37,11 @@ class Inspection(models.Model):
         editable=False,
     )
 
-    train_number = models.CharField(max_length=20)
+    train_number = models.CharField(    
+        max_length=20,
+        blank=True,
+        null=True,
+    )
 
     train_name = models.CharField(
         max_length=225,
@@ -33,9 +57,9 @@ class Inspection(models.Model):
     )
 
     status = models.CharField(
-        max_length=20,
+        max_length=50,
         choices=InspectionStatus.choices,
-        default=InspectionStatus.PENDING,
+        default=InspectionStatus.AWAITING_TRAIN_NUMBER,
     )
 
     total_coaches = models.PositiveIntegerField(default=0)
