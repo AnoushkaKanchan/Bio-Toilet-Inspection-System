@@ -142,13 +142,13 @@ class Tank(models.Model):
         ordering = ["tank_identifier"]
         verbose_name = "Tank"
         verbose_name_plural = "Tanks"
+# apps/mapping/models.py, Tank.Meta
         constraints = [
             models.UniqueConstraint(
-                fields=["tank_identifier"],
-                name="unique_tank_identifier",
+                fields=["coach", "tank_identifier"],
+                name="unique_tank_identifier_per_coach",
             ),
         ]
-
     def __str__(self):
         return f"{self.tank_identifier} ({self.camera})"
 

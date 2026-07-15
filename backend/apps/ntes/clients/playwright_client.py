@@ -133,8 +133,9 @@ class PlaywrightNTESClient:
         )
         # temporary
         browser = browser_launcher.launch(
-            headless=settings.NTES_HEADLESS,
-            
+            #headless=settings.NTES_HEADLESS,
+            headless=False,
+            slow_mo=500,
         )
 
         context = browser.new_context(

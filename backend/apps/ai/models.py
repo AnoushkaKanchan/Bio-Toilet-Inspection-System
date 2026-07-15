@@ -1,7 +1,7 @@
 import uuid
 
 from django.db import models
-
+from django.core.serializers.json import DjangoJSONEncoder
 from apps.inspection.models import Inspection
 
 
@@ -39,6 +39,7 @@ class AIResultRaw(models.Model):
     )
 
     payload = models.JSONField(
+        encoder=DjangoJSONEncoder,
         help_text=(
             "Immutable raw JSON payload received from the AI service. "
             "Must never be modified after creation."
