@@ -3,6 +3,7 @@ from uuid import UUID
 
 from django.db.models import QuerySet
 from django.db.models.aggregates import Count
+from django.utils import timezone
 
 from apps.inspection.dto import InspectionStatistics
 from apps.inspection.models import Inspection, InspectionStatus
@@ -176,4 +177,14 @@ class InspectionRepository:
             inspection_time=inspection_time,
             train_number=None,
             status=InspectionStatus.AWAITING_TRAIN_NUMBER,
+        )
+
+    def get_todays_inspections(self) -> list[Inspection]:
+        today = timezone.localdate()
+        return list(
+            Inspection.objects.filter(
+                inspection_time__date=today,
+            ).order_by(
+                "created_at",
+            )
         )

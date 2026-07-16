@@ -8,6 +8,8 @@ class FetchTrainResponseSerializer(
     inspection_id = serializers.UUIDField()
     coaches_synchronized = serializers.IntegerField()
     mapping_executed = serializers.BooleanField()
+    train_number = serializers.CharField()
+    train_name = serializers.CharField(allow_null=True)
 
 class FetchTrainRequestSerializer(serializers.Serializer):
     train_number = serializers.RegexField(

@@ -36,8 +36,6 @@ class AIResultAPIView(APIView):
         serializer.is_valid(
             raise_exception=True,
         )
-        # temp
-        print(serializer.validated_data)
 
         try:
             acknowledgement = self._service.process(
@@ -45,7 +43,6 @@ class AIResultAPIView(APIView):
             )
 
         except AIContractError as exc:
-            print("AIContractError:", repr(exc))
             return Response(
                 {"success": False, "message": str(exc)},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -68,3 +65,15 @@ class AIResultAPIView(APIView):
                 {"success": False, "message": str(exc)},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
+
+        except AIPersistenceError as exc:
+            return Response(
+                {"success": False, "message": str(exc)},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        serializer = AIAcknowledgementSerializer(acknowledgement)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )

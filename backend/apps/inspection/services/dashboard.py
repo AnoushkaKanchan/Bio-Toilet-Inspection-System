@@ -1,6 +1,7 @@
 from apps.inspection.repositories import InspectionRepository
 from apps.mapping.repositories import CoachRepository
 from apps.reports.services.dashboard import DashboardService as ReportsDashboardService
+from apps.mapping.models import MappingStatus
 
 
 class DashboardService:
@@ -30,7 +31,7 @@ class DashboardService:
         }
 
     def get_live_pitlines(self) -> dict:
-        inspections = self._repository.get_active_inspections()
+        inspections = self._repository.get_todays_inspections()
 
         result = []
 
@@ -42,14 +43,12 @@ class DashboardService:
                     "status": inspection.status,
                     "started_at": inspection.created_at.isoformat(),
                     "defects": inspection.total_defected_tanks,
-                    "inspected_coaches": 0,
-                    "total_coaches": inspection.total_coaches,
+                    "inspected_coaches": inspection.total_coaches,
+                    "total_coaches": inspection.ntes_total_coaches or 0,
                 }
             )
 
-        return {
-            "pit_lines": result,
-        }
+        return {"pit_lines": result}
 
     def get_operations_status(self) -> dict:
         inspections = self._repository.get_active_inspections()

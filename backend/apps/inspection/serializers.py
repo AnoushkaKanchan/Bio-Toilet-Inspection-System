@@ -13,8 +13,10 @@ class InspectionListItemSerializer(serializers.Serializer,):
 class TrainInfoSerializer(serializers.Serializer,):
     number = serializers.CharField()
     name = serializers.CharField(allow_null=True,)
+    coaches_synchronized = serializers.IntegerField()
 
-class InspectionSummarySerializer(serializers.Serializer,):
+# apps/inspection/serializers.py
+class InspectionSummarySerializer(serializers.Serializer):
     started_at = serializers.DateTimeField()
     duration_minutes = serializers.IntegerField()
     coaches_detected = serializers.IntegerField()
@@ -26,15 +28,15 @@ class DefectSummarySerializer(serializers.Serializer,):
     pipe_support_absent = serializers.IntegerField()
     surface_not_clean = serializers.IntegerField()
 
-class MappingStatusSerializer(serializers.Serializer,):
+class MappingStatusSerializer(serializers.Serializer):
     completed = serializers.BooleanField()
     message = serializers.CharField()
+    train = TrainInfoSerializer()
 
 class InspectionDetailsItemSerializer(serializers.Serializer,):
     inspection_id = serializers.CharField()
     status = serializers.CharField()
     pit_line = serializers.CharField()
-    train = TrainInfoSerializer()
     inspection = InspectionSummarySerializer()
     defect_summary = DefectSummarySerializer()
     mapping = MappingStatusSerializer()

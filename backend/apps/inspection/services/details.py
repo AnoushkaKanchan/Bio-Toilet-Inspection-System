@@ -37,18 +37,16 @@ class InspectionDetailsService:
         train = TrainInfoDTO(
             number=inspection.train_number,
             name=inspection.train_name,
+            coaches_synchronized=inspection.ntes_total_coaches or 0,
         )
 
         inspection_summary = InspectionSummaryDTO(
             started_at=inspection.inspection_time,
-            duration_minutes=self._duration_minutes(
-                inspection,
-            ),
+            duration_minutes=self._duration_minutes(inspection),
             coaches_detected=inspection.total_coaches,
-            total_coaches=inspection.total_coaches,
+            total_coaches=inspection.ntes_total_coaches or 0,
             total_defects=inspection.total_defected_tanks,
         )
-
         summary = {
             "PIPE_NOT_CONNECTED": 0,
             "PIPE_SUPPORT_ABSENT": 0,
@@ -70,6 +68,7 @@ class InspectionDetailsService:
                 f"Coach composition verified against train "
                 f"{inspection.train_number}."
             ),
+            train=train,
         )
 
         return InspectionDetailsItemDTO(

@@ -55,4 +55,6 @@ class FetchTrainService:
             inspection_id=str(inspection.id),
             coaches_synchronized=len(coaches),
             mapping_executed=mapping_executed,
+            train_number=inspection.train_number,
+            train_name=inspection.train_name,      
         )
