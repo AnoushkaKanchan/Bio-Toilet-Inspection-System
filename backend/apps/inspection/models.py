@@ -4,10 +4,6 @@ from django.db import models
 
 
 class InspectionStatus(models.TextChoices):
-    SCANNING = (
-        "SCANNING",
-        "Scanning",
-    )
 
     AWAITING_TRAIN_NUMBER = (
         "AWAITING_TRAIN_NUMBER",
@@ -63,6 +59,12 @@ class Inspection(models.Model):
     )
 
     total_coaches = models.PositiveIntegerField(default=0)
+    
+    ntes_total_coaches = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Train's actual coach count from NTES composition. Null until a train number is confirmed.",
+    )
 
     total_tanks = models.PositiveIntegerField(default=0)
 

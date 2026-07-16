@@ -7,7 +7,7 @@ from apps.ntes.models import NTESCoach
 
 
 class MappingStatus(models.TextChoices):
-    PENDING = "PENDING", "Pending"
+    AWAITING_TRAIN_NUMBER = "AWAITING_TRAIN_NUMBER","Awaiting Train Number",
     MATCHED = "MATCHED", "Matched"
     UNMATCHED = "UNMATCHED", "Unmatched"
 
@@ -51,9 +51,9 @@ class Coach(models.Model):
     )
 
     mapping_status = models.CharField(
-        max_length=20,
+        max_length=50,
         choices=MappingStatus.choices,
-        default=MappingStatus.PENDING,
+        default=MappingStatus.AWAITING_TRAIN_NUMBER,
     )
 
     coach_inspection_status = models.CharField(

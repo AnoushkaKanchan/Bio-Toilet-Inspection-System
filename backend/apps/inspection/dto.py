@@ -37,8 +37,10 @@ class RecentActivityDTO:
 class TrainInfoDTO:
     number: str
     name: str | None
+    coaches_synchronized: int
 
 
+# apps/inspection/dto.py
 @dataclass(frozen=True)
 class InspectionSummaryDTO:
     started_at: datetime
@@ -59,6 +61,7 @@ class DefectSummaryDTO:
 class MappingStatusDTO:
     completed: bool
     message: str
+    train: TrainInfoDTO
 
 
 @dataclass(frozen=True)

@@ -74,9 +74,13 @@ class SynchronizationService:
             coaches=coach_dtos,
         )
 
+        # apps/ntes/services/synchronization.py
         coaches = self._verifier.verify(
             inspection=inspection,
         )
+
+        inspection.ntes_total_coaches = len(coaches)
+        inspection.save(update_fields=["ntes_total_coaches"])
 
         # Check if an AI payload is already present for mapping
         ai_result = self._ai_repository.get_latest_by_inspection(

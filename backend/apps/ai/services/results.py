@@ -1,5 +1,7 @@
 import random
 
+from django.db import transaction
+
 from apps.ai.dto import AIAcknowledgementDTO
 from apps.ai.exceptions import DuplicateAIResultError
 from apps.ai.services import (
@@ -40,6 +42,7 @@ class AIResultService:
             or AIResultRawRepository()
         )
 
+    @transaction.atomic
     def process(
         self,
         *,
@@ -75,25 +78,27 @@ class AIResultService:
         )
 
         # 5. Normalize tanks
-        self._persistence_service.persist(
+        self._persistence_service.persist_tanks(
             inspection=inspection,
             payload=payload,
         )
 
+        # 6. Refresh inspection summary from live counts
+        statistics = self._inspection_repository.get_statistics(
+            inspection=inspection,
+        )
+
+        self._inspection_repository.update_summary(
+            inspection=inspection,
+            statistics=statistics,
+        )
+
         # 6. Calculate tank metrics
         total_tanks = len(payload["tanks"])
-
         total_defected_tanks = sum(
             1
             for tank in payload["tanks"]
             if tank["maintenance_status"] == "Maintenance Required"
-        )
-
-        # 7. Update inspection summary
-        self._inspection_repository.update_summary(
-            inspection=inspection,
-            total_tanks=total_tanks,
-            total_defected_tanks=total_defected_tanks,
         )
 
         return AIAcknowledgementDTO(
