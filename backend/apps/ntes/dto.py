@@ -28,3 +28,5 @@ class FetchTrainResponseDTO:
     inspection_id: str
     coaches_synchronized: int
     mapping_executed: bool
+    train_number: str
+    train_name: str | None
