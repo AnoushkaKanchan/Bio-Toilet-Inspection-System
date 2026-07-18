@@ -1,7 +1,13 @@
+from math import floor
+
+from django.db.models.aggregates import Count
+from django.utils import timezone
+
 from apps.inspection.repositories import InspectionRepository
 from apps.mapping.repositories import CoachRepository
 from apps.reports.services.dashboard import DashboardService as ReportsDashboardService
-from apps.mapping.models import MappingStatus
+from apps.mapping.models import TankDefect
+from apps.mapping.enums import TankDefectType
 
 
 class DashboardService:
@@ -38,13 +44,16 @@ class DashboardService:
         for inspection in inspections:
             result.append(
                 {
+                    "inspection_id": str(inspection.id),
                     "pit_line": inspection.pit_line_number,
                     "train_number": inspection.train_number,
                     "status": inspection.status,
                     "started_at": inspection.created_at.isoformat(),
+                    "duration_minutes": self._get_duration_minutes(inspection=inspection),
                     "defects": inspection.total_defected_tanks,
                     "inspected_coaches": inspection.total_coaches,
                     "total_coaches": inspection.ntes_total_coaches or 0,
+                    "defect_summary": self._get_defect_summary(inspection=inspection),
                 }
             )
 
@@ -123,3 +132,26 @@ class DashboardService:
             "train_number": inspection.train_number,
             "coaches": result,
         }
+
+    def _get_defect_summary(self, *, inspection) -> dict:
+        counts = (
+            TankDefect.objects.filter(
+                tank__coach__inspection=inspection,
+            )
+            .values("defect_type")
+            .annotate(count=Count("id"))
+        )
+
+        by_type = {row["defect_type"]: row["count"] for row in counts}
+
+        return {
+            "pipe_not_connected": by_type.get(TankDefectType.PIPE_NOT_CONNECTED, 0),
+            "pipe_support_absent": by_type.get(TankDefectType.PIPE_SUPPORT_ABSENT, 0),
+            "surface_not_clean": by_type.get(TankDefectType.SURFACE_NOT_CLEAN, 0),
+        }
+
+    def _get_duration_minutes(self, *, inspection) -> int:
+        now = timezone.now()
+        duration = now - inspection.created_at
+        minutes = floor(duration.total_seconds() / 60)
+        return max(minutes, 0)

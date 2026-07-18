@@ -15,14 +15,16 @@ class InspectionStatistics:
 
 @dataclass(frozen=True)
 class LivePitLineDTO:
+    inspection_id: str
     pit_line: str
     train_number: str | None
     status: str
     started_at: str
+    duration_minutes: int
     defects: int
     inspected_coaches: int
     total_coaches: int
-
+    defect_summary: DefectSummaryDTO
 
 @dataclass(frozen=True)
 class RecentActivityDTO:
