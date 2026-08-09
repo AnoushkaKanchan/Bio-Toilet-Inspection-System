@@ -93,3 +93,15 @@ class CoachInspectionReportSerializer(serializers.Serializer,):
     maintenance = serializers.ListField(child=serializers.CharField(),)
     remarks = serializers.CharField()
     navigation = NavigationSerializer()
+
+class CoachInspectionImageSerializer(serializers.Serializer):
+    label = serializers.CharField()
+    image_url = serializers.CharField()
+    tank_identifier = serializers.CharField()
+    camera_side = serializers.CharField()
+
+
+class CoachInspectionImagesSerializer(serializers.Serializer):
+    coach_type = serializers.CharField()
+    train_number = serializers.CharField()
+    images = CoachInspectionImageSerializer(many=True)

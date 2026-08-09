@@ -1,5 +1,7 @@
 from apps.inspection.dto import (
     CoachInfoDTO,
+    CoachInspectionImageDTO,
+    CoachInspectionImagesDTO,
     CoachInspectionReportDTO,
     CoachInspectionSummaryDTO,
     FindingDTO,
@@ -251,4 +253,42 @@ class CoachInspectionReportService:
 
         return (
             "Multiple maintenance issues detected."
+        )
+
+    def get_images(
+        self,
+        *,
+        inspection_id,
+        coach_id,
+    ) -> CoachInspectionImagesDTO:
+
+        inspection = self._inspection_repository.get(
+            inspection_id=inspection_id,
+        )
+
+        coach = self._coach_repository.get_details(
+            inspection=inspection,
+            coach_id=coach_id,
+        )
+
+        tanks = sorted(
+            coach.tanks.all(),
+            key=lambda t: t.tank_identifier,
+        )
+
+        images = [
+            CoachInspectionImageDTO(
+                label=f"Image {index}",
+                image_url=tank.evidence_image_path,
+                tank_identifier=tank.tank_identifier,
+                camera_side=tank.camera,
+            )
+            for index, tank in enumerate(tanks, start=1)
+            if tank.evidence_image_path
+        ]
+
+        return CoachInspectionImagesDTO(
+            coach_type=coach.ntes_coach.coach_type,
+            train_number=inspection.train_number,
+            images=images,
         )

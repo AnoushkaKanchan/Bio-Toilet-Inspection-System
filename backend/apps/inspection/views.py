@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from apps.inspection.models import Inspection
 
 from apps.inspection.serializers import (
+    CoachInspectionImagesSerializer,
     CoachInspectionReportSerializer,
     CoachListResponseSerializer,
     InspectionDetailsItemSerializer,
@@ -218,6 +219,52 @@ class CoachInspectionReportAPIView(
         serializer = CoachInspectionReportSerializer(
             report,
         )
+
+        return Response(
+            serializer.data,
+        )
+
+class CoachInspectionImagesAPIView(APIView):
+
+    def __init__(
+        self,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+
+        self._service = CoachInspectionReportService()
+
+    def get(
+        self,
+        request,
+        inspection_id,
+        coach_id,
+    ):
+        try:
+            images = self._service.get_images(
+                inspection_id=inspection_id,
+                coach_id=coach_id,
+            )
+
+        except Inspection.DoesNotExist:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Inspection not found.",
+                },
+                status=404,
+            )
+
+        except Exception:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Coach not found.",
+                },
+                status=404,
+            )
+
+        serializer = CoachInspectionImagesSerializer(images)
 
         return Response(
             serializer.data,

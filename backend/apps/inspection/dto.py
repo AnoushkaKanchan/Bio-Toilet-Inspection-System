@@ -149,3 +149,17 @@ class CoachInspectionReportDTO:
     maintenance: list[str]
     remarks: str
     navigation: NavigationDTO
+
+@dataclass(frozen=True, slots=True)
+class CoachInspectionImageDTO:
+    label: str
+    image_url: str
+    tank_identifier: str
+    camera_side: str
+
+
+@dataclass(frozen=True, slots=True)
+class CoachInspectionImagesDTO:
+    coach_type: str
+    train_number: str
+    images: list[CoachInspectionImageDTO]
