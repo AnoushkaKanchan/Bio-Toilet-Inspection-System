@@ -92,7 +92,7 @@ class InspectionRepository:
     def get_recent_inspections(
         self,
         *,
-        limit: int = 10,
+        limit: int = 4,
     ) -> list[Inspection]:
         return list(
             Inspection.objects.order_by(
