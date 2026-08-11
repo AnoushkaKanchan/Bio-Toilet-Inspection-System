@@ -8,8 +8,9 @@ backend/.venv/
 # Environment Variables
 backend/.env
 
-# Django
-*.sqlite3
+# Databse
+*.dump
+*.sql
 
 # Media
 media/*
